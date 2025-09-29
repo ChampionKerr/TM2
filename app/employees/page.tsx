@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -82,30 +82,8 @@ export default function EmployeesPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    if (!session || !session.user || session.user.role !== 'admin') {
-      router.push('/dashboard');
-      return;
-    }
-    fetchEmployees();
-    fetchAllEmployeesForStats();
-  }, [session, router, page, rowsPerPage]);
-
-  const fetchAllEmployeesForStats = async () => {
-    try {
-      // Fetch all employees without pagination for statistics
-      const response = await fetch('/api/employees');
-      if (response.ok) {
-        const responseData = await response.json();
-        const employeesData = responseData.employees || responseData.data || responseData;
-        setAllEmployees(Array.isArray(employeesData) ? employeesData : []);
-      }
-    } catch (error) {
-      console.error('Failed to fetch all employees for stats:', error);
-    }
-  };
-
-  const fetchEmployees = async () => {
+  // Define fetchEmployees before useEffect to avoid hoisting issues
+  const fetchEmployees = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -149,6 +127,29 @@ export default function EmployeesPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  }, [page, rowsPerPage]);
+
+  useEffect(() => {
+    if (!session || !session.user || session.user.role !== 'admin') {
+      router.push('/dashboard');
+      return;
+    }
+    fetchEmployees();
+    fetchAllEmployeesForStats();
+  }, [session, router, page, rowsPerPage, fetchEmployees]);
+
+  const fetchAllEmployeesForStats = async () => {
+    try {
+      // Fetch all employees without pagination for statistics
+      const response = await fetch('/api/employees');
+      if (response.ok) {
+        const responseData = await response.json();
+        const employeesData = responseData.employees || responseData.data || responseData;
+        setAllEmployees(Array.isArray(employeesData) ? employeesData : []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch all employees for stats:', error);
     }
   };
 
@@ -241,7 +242,7 @@ export default function EmployeesPage() {
         const error = await response.json();
         throw new Error(error.error);
       }
-    } catch (error) {
+    } catch (_error) {
       setSnackbar({
         open: true,
         message: `Failed to ${selectedEmployee ? 'update' : 'create'} employee`,
@@ -270,7 +271,7 @@ export default function EmployeesPage() {
       } else {
         throw new Error('Failed to delete employee');
       }
-    } catch (error) {
+    } catch (_error) {
       setSnackbar({
         open: true,
         message: 'Failed to delete employee',
@@ -363,7 +364,7 @@ export default function EmployeesPage() {
             No employees found
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 1 }}>
-            Click "Add Employee" to create the first employee record
+            Click &quot;Add Employee&quot; to create the first employee record
           </Typography>
         </Box>
       ) : (

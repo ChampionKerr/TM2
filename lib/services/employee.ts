@@ -90,7 +90,7 @@ export async function listEmployees(page?: number, limit?: number): Promise<Serv
 
       return { success: true, data: { employees } };
     }
-  } catch (error) {
+  } catch (_error) {
     return { success: false, error: 'Failed to fetch employees' };
   }
 }

@@ -12,7 +12,6 @@ const leaveRequestSchema = z.object({
   reason: z.string().max(500).optional(),
 });
 
-type LeaveStatus = 'Pending' | 'Approved' | 'Rejected';
 type CreateLeaveRequestInput = z.infer<typeof leaveRequestSchema>;
 
 interface ServiceResult<T> {

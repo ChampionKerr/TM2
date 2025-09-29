@@ -30,7 +30,7 @@ export default function ResponsiveAppBar() {
   const router = useRouter();
 
   // Dynamic pages based on user role
-  const isAdmin = session?.user && (session.user as any)?.role === 'admin';
+    const isAdmin = session?.user?.role === 'admin';
   const dynamicPages = isAdmin ? [...pages, 'Admin'] : pages;
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {

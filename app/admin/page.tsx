@@ -20,9 +20,7 @@ import {
   Select,
   MenuItem,
   Chip,
-  Avatar,
-  Card,
-  CardContent
+  Avatar
 } from '@mui/material';
 import {
   Dashboard as DashboardIcon,

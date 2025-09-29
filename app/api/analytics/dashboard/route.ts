@@ -69,7 +69,7 @@ export async function GET(request: NextRequest) {
             EXTRACT(YEAR FROM "requestedAt") as year,
             COUNT(*) as count,
             status
-          FROM "LeaveRequest" 
+          FROM "leave_requests" 
           WHERE "requestedAt" >= NOW() - INTERVAL '12 months'
           GROUP BY EXTRACT(MONTH FROM "requestedAt"), EXTRACT(YEAR FROM "requestedAt"), status
           ORDER BY year DESC, month DESC

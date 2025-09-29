@@ -96,6 +96,12 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  
+  // Enable ESLint during build with strict checking
+  eslint: {
+    ignoreDuringBuilds: false,
+    dirs: ['app', 'components', 'lib', 'types'],
+  },
 
   // Configure environment variables that should be exposed to the browser
   env: {

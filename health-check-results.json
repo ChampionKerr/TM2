@@ -1,27 +1,30 @@
 {
-  "timestamp": "2025-09-27T02:33:42.690Z",
+  "timestamp": "2025-09-29T04:29:15.013Z",
   "healthy": false,
   "summary": {
     "total": 6,
-    "healthy": 4,
+    "healthy": 3,
     "warning": 1,
-    "unhealthy": 1
+    "unhealthy": 2
   },
   "results": [
     {
       "service": "Environment Variables",
-      "status": "healthy",
-      "message": "All required environment variables are set",
+      "status": "unhealthy",
+      "message": "Missing required variables: DATABASE_URL, NEXTAUTH_SECRET, NEXTAUTH_URL",
       "details": {
-        "required": 3,
-        "optional": 0,
+        "missing_required": [
+          "DATABASE_URL",
+          "NEXTAUTH_SECRET",
+          "NEXTAUTH_URL"
+        ],
         "missing_optional": [
           "RESEND_API_KEY",
           "REDIS_URL",
           "SENTRY_DSN"
         ]
       },
-      "timestamp": "2025-09-27T02:33:42.066Z"
+      "timestamp": "2025-09-29T04:29:14.963Z"
     },
     {
       "service": "Optional Environment Variables",
@@ -34,19 +37,19 @@
           "SENTRY_DSN"
         ]
       },
-      "timestamp": "2025-09-27T02:33:42.066Z"
+      "timestamp": "2025-09-29T04:29:14.965Z"
     },
     {
       "service": "Memory Usage",
       "status": "healthy",
-      "message": "Memory usage normal: 91MB",
+      "message": "Memory usage normal: 89MB",
       "details": {
-        "rss_mb": 91,
+        "rss_mb": 89,
         "heap_used_mb": 8,
         "heap_total_mb": 17,
         "external_mb": 3
       },
-      "timestamp": "2025-09-27T02:33:42.068Z"
+      "timestamp": "2025-09-29T04:29:14.966Z"
     },
     {
       "service": "System Info",
@@ -59,14 +62,14 @@
         "uptime": 0,
         "cpu_count": 12,
         "total_memory_gb": 27,
-        "free_memory_gb": 20,
+        "free_memory_gb": 19,
         "load_average": [
-          0.56,
-          0.98,
-          1.23
+          1.58,
+          1.33,
+          1.17
         ]
       },
-      "timestamp": "2025-09-27T02:33:42.077Z"
+      "timestamp": "2025-09-29T04:29:14.975Z"
     },
     {
       "service": "Disk Space",
@@ -76,16 +79,16 @@
         "path": "/home/skerr1984/Timewise_chat_gpt/timewise-hrms-pro/timewise-hrms",
         "accessible": true
       },
-      "timestamp": "2025-09-27T02:33:42.077Z"
+      "timestamp": "2025-09-29T04:29:14.976Z"
     },
     {
       "service": "Database",
       "status": "unhealthy",
       "message": "Database connection failed",
       "details": {
-        "error": "Error querying the database: FATAL: Tenant or user not found"
+        "error": "\u001b[1;91merror\u001b[0m: \u001b[1mEnvironment variable not found: DATABASE_URL.\u001b[0m\n  \u001b[1;94m-->\u001b[0m  \u001b[4mschema.prisma:7\u001b[0m\n\u001b[1;94m   | \u001b[0m\n\u001b[1;94m 6 | \u001b[0m  provider     = \"postgresql\"\n\u001b[1;94m 7 | \u001b[0m  url          = \u001b[1;91menv(\"DATABASE_URL\")\u001b[0m\n\u001b[1;94m   | \u001b[0m\n\nValidation Error Count: 1"
       },
-      "timestamp": "2025-09-27T02:33:42.657Z"
+      "timestamp": "2025-09-29T04:29:14.976Z"
     }
   ]
 }

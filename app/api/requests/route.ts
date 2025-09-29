@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
 import { 
   listLeaveRequests,
-  createLeaveRequest,
-  reviewLeaveRequest
+  createLeaveRequest
 } from '@/lib/services/leave-request';
 
 export async function GET(request: NextRequest) {
@@ -76,7 +75,7 @@ export async function POST(request: NextRequest) {
     let body;
     try {
       body = await request.json();
-    } catch (e) {
+    } catch (_e) {
       return NextResponse.json(
         { error: 'Invalid JSON in request body' },
         { status: 400 }

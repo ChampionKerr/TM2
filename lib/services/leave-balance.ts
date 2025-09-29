@@ -82,7 +82,7 @@ export async function updateLeaveBalance(
 
     // Start transaction
     return await prisma.$transaction(async (tx) => {
-      let updateData: { vacationDays?: number; sickDays?: number } = {};
+      const updateData: { vacationDays?: number; sickDays?: number } = {};
 
       // Calculate new balance based on leave type
       switch (validatedData.leaveType) {

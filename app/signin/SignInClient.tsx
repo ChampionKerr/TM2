@@ -2,12 +2,20 @@
 
 import { Box, Container, Paper, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import SignInForm from './SignInForm';
 import Logo from '@/components/Logo';
 
 export default function SignInClient() {
   const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'authenticated' && session) {
+      router.push('/dashboard');
+    }
+  }, [session, status, router]);
 
   if (status === 'loading') {
     return (
@@ -27,7 +35,21 @@ export default function SignInClient() {
   }
 
   if (session) {
-    redirect('/dashboard');
+    // Show loading state while redirecting
+    return (
+      <Container maxWidth="sm">
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '100vh',
+          }}
+        >
+          <Typography>Redirecting to dashboard...</Typography>
+        </Box>
+      </Container>
+    );
   }
 
   return (

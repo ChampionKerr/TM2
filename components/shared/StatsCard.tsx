@@ -44,7 +44,7 @@ export function StatsCard({
     }
   };
 
-  const getTrendColor = () => {
+  const _getTrendColor = () => {
     switch (trend?.direction) {
       case 'up': return theme.palette.success.main;
       case 'down': return theme.palette.error.main;
