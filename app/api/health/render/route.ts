@@ -3,9 +3,6 @@
 
 import { NextResponse } from 'next/server';
 
-// Check if we're in build mode
-const isBuildTime = process.env.IS_BUILD_TIME === 'true' || !process.env.DATABASE_URL || process.env.VERCEL_ENV === 'preview';
-
 interface HealthCheckResult {
   status: 'healthy' | 'unhealthy';
   timestamp: string;
@@ -35,8 +32,19 @@ interface HealthCheckResult {
 }
 
 async function checkDatabase(): Promise<HealthCheckResult['services']['database']> {
+  // Enhanced build-time detection
+  const buildDetectionReasons = {
+    IS_BUILD_TIME: process.env.IS_BUILD_TIME === 'true',
+    VERCEL_ENV_PREVIEW: process.env.VERCEL_ENV === 'preview', 
+    NO_DATABASE_URL: !process.env.DATABASE_URL || process.env.DATABASE_URL === '',
+    PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production'
+  }
+  
+  const isBuildTime = Object.values(buildDetectionReasons).some(Boolean)
+  
   // Skip database operations completely during build time
   if (isBuildTime) {
+    console.log('[RENDER HEALTH CHECK] Skipping database connection - build mode detected')
     return {
       status: 'disconnected',
       error: 'Database check skipped during build time'
@@ -88,6 +96,16 @@ function getEnvironmentInfo(): HealthCheckResult['services']['environment'] {
 }
 
 export async function GET(): Promise<NextResponse> {
+  // Enhanced build-time detection
+  const buildDetectionReasons = {
+    IS_BUILD_TIME: process.env.IS_BUILD_TIME === 'true',
+    VERCEL_ENV_PREVIEW: process.env.VERCEL_ENV === 'preview', 
+    NO_DATABASE_URL: !process.env.DATABASE_URL || process.env.DATABASE_URL === '',
+    PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production'
+  }
+  
+  const isBuildTime = Object.values(buildDetectionReasons).some(Boolean)
+  
   try {
     // Perform all health checks
     const database = await checkDatabase();
@@ -167,6 +185,16 @@ export async function GET(): Promise<NextResponse> {
 
 // Support HEAD requests for simple health checks
 export async function HEAD(): Promise<NextResponse> {
+  // Enhanced build-time detection
+  const buildDetectionReasons = {
+    IS_BUILD_TIME: process.env.IS_BUILD_TIME === 'true',
+    VERCEL_ENV_PREVIEW: process.env.VERCEL_ENV === 'preview', 
+    NO_DATABASE_URL: !process.env.DATABASE_URL || process.env.DATABASE_URL === '',
+    PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production'
+  }
+  
+  const isBuildTime = Object.values(buildDetectionReasons).some(Boolean)
+  
   if (isBuildTime) {
     return new NextResponse(null, { status: 200 });
   }

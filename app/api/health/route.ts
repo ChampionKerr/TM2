@@ -1,28 +1,53 @@
 import { NextResponse } from 'next/server'
 import { logger } from '@/lib/logger'
 
-// Check if we're in build mode (static generation)
-const isBuildTime = process.env.IS_BUILD_TIME === 'true' || !process.env.DATABASE_URL || process.env.VERCEL_ENV === 'preview'
-
 export async function GET(_request: Request) {
   const startTime = Date.now()
   
+  // Enhanced build-time detection with logging
+  const buildDetectionReasons = {
+    IS_BUILD_TIME: process.env.IS_BUILD_TIME === 'true',
+    VERCEL_ENV_PREVIEW: process.env.VERCEL_ENV === 'preview', 
+    NO_DATABASE_URL: !process.env.DATABASE_URL || process.env.DATABASE_URL === '',
+    PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production'
+  }
+  
+  const isBuildTime = Object.values(buildDetectionReasons).some(Boolean)
+  
+  // Log detection results for debugging
+  console.log('[HEALTH CHECK] Build detection:', {
+    isBuildTime,
+    reasons: buildDetectionReasons,
+    NODE_ENV: process.env.NODE_ENV,
+    VERCEL: process.env.VERCEL,
+    DATABASE_URL_EXISTS: !!process.env.DATABASE_URL
+  })
+  
   // Database health check
   let databaseStatus: 'HEALTHY' | 'FAILED' = 'FAILED'
-  let databaseDetails: Record<string, string | number | boolean> = {}
+  let databaseDetails: Record<string, string | number | boolean | object> = {}
   
   if (isBuildTime) {
     // Skip database operations completely during build
     databaseStatus = 'FAILED'
     databaseDetails = { 
       error: 'Database check skipped during build time',
-      build_mode: true
+      build_mode: true,
+      detection_reasons: buildDetectionReasons
     }
+    console.log('[HEALTH CHECK] Skipping database connection - build mode detected')
   } else {
     // Only attempt database connection when not in build mode
     try {
+      console.log('[HEALTH CHECK] Attempting database connection...')
       const { PrismaClient } = await import('@prisma/client')
-      const prisma = new PrismaClient()
+      const prisma = new PrismaClient({
+        datasources: {
+          db: {
+            url: process.env.DATABASE_URL
+          }
+        }
+      })
       
       await prisma.$connect()
       
@@ -37,13 +62,16 @@ export async function GET(_request: Request) {
         connection: 'active'
       }
       
+      console.log('[HEALTH CHECK] Database connection successful')
       await prisma.$disconnect()
       
     } catch (error) {
+      console.error('[HEALTH CHECK] Database connection failed:', error)
       logger.error('Health check database connection failed', { error })
       databaseDetails = {
         error: error instanceof Error ? error.message : 'Unknown database error',
-        build_mode: false
+        build_mode: false,
+        attempted_connection: true
       }
     }
   }
