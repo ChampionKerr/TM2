@@ -41,7 +41,7 @@
     "production:setup": "npm ci && npm run prisma:migrate:prod && npm run prisma:seed && npm run build",
     "production:start": "npm run health-check && npm start",
     "security:audit": "npm audit --audit-level high",
-    "vercel:build": "prisma generate && prisma migrate deploy && next build",
+    "vercel:build": "NODE_OPTIONS='--max-old-space-size=2048' prisma generate && next build",
     "vercel:dev": "next dev",
     "vercel:start": "next start",
     "postinstall": "prisma generate"
@@ -58,6 +58,7 @@
     "@types/nodemailer": "^7.0.1",
     "@upstash/redis": "^1.35.3",
     "bcryptjs": "^3.0.2",
+    "core-js": "^3.38.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.2",
     "next": "^14.2.33",
@@ -71,9 +72,11 @@
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "@babel/plugin-syntax-import-attributes": "^7.27.1",
+    "@babel/plugin-transform-runtime": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-react": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
+    "@babel/runtime": "^7.28.4",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",

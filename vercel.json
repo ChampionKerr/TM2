@@ -1,22 +1,25 @@
 {
   "version": 2,
   "framework": "nextjs",
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run vercel:build",
   "outputDirectory": ".next",
-  "installCommand": "npm ci",
+  "installCommand": "npm ci --legacy-peer-deps",
   "devCommand": "npm run dev",
   "regions": ["iad1"],
+  "functions": {
+    "node": "18.x",
+    "app/api/**/*.ts": {
+      "maxDuration": 10
+    }
+  },
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "SKIP_ENV_VALIDATION": "true"
   },
   "build": {
     "env": {
-      "NODE_ENV": "production"
-    }
-  },
-  "functions": {
-    "app/api/**/*.ts": {
-      "maxDuration": 10
+      "NODE_ENV": "production",
+      "SKIP_ENV_VALIDATION": "true"
     }
   },
   "headers": [
