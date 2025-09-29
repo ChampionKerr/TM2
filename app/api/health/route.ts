@@ -11,17 +11,13 @@ export async function GET(_request: Request) {
     VERCEL_ENV_PREVIEW: process.env.VERCEL_ENV === 'preview', 
     NO_DATABASE_URL: !process.env.DATABASE_URL || process.env.DATABASE_URL === '',
     PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production',
-    // During static generation, we should have minimal request context
-    STATIC_GENERATION: process.env.NODE_ENV === 'production' && 
+    // During actual static generation, we should have minimal request context AND specific argv
+    STATIC_GENERATION: process.env.NEXT_PHASE === 'phase-production-build' && 
+                       process.env.NODE_ENV === 'production' && 
                        process.env.VERCEL === '1' &&
-                       // During build time, treat any API route call as build-time
                        !_request.headers.get('x-forwarded-for') && // No real client IP
                        !_request.headers.get('cf-ray') && // No Cloudflare routing
-                       !_request.headers.get('x-vercel-id'), // No Vercel request ID
-    // Check if we're in actual compilation phase
-    COMPILATION_PHASE: typeof process !== 'undefined' && 
-                       (process.argv?.some(arg => arg.includes('next-server')) ||
-                        process.env.__NEXT_PRIVATE_PREBUNDLED_REACT === 'next')
+                       !_request.headers.get('x-vercel-id') // No Vercel request ID
   }
   
   const isBuildTime = Object.values(buildDetectionReasons).some(Boolean)
