@@ -2,12 +2,14 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>'],
   transform: {
-    '^.+\\.(t|j)sx?$': ['babel-jest', {
-      presets: [
-        ['@babel/preset-env', { targets: { node: 'current' } }],
-        '@babel/preset-typescript',
-        ['@babel/preset-react', { runtime: 'automatic' }],
-      ],
+    '^.+\\.(t|j)sx?$': ['@swc/jest', {
+      jsc: {
+        target: 'es2017',
+        parser: {
+          syntax: 'typescript',
+          tsx: true,
+        },
+      },
     }],
   },
   testRegex: '(/__tests__/.*(api|service)\\.(test|spec))\\.tsx?$',
@@ -16,7 +18,7 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/$1',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(jose|@panva|@babel|oidc-token-hash|openid-client)/)'
+    'node_modules/(?!(jose|@panva|oidc-token-hash|openid-client)/)'
   ],
   setupFilesAfterEnv: ['./jest.setup.ts'],
   testPathIgnorePatterns: ['/node_modules/', '/.next/'],
