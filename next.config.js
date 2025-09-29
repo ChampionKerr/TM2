@@ -74,23 +74,16 @@ const nextConfig = {
     return [
       {
         source: '/',
-        destination: '/dashboard',
-        permanent: true,
+        destination: '/signin',
+        permanent: false,
       },
     ];
   },
 
-  // Handle 404s gracefully
-  async rewrites() {
-    return {
-      fallback: [
-        {
-          source: '/:path*',
-          destination: '/404',
-        },
-      ],
-    };
-  },
+  // Static export configuration for Vercel
+  trailingSlash: false,
+  skipTrailingSlashRedirect: true,
+  output: 'standalone',
 
   // Enable TypeScript type checking during build
   typescript: {

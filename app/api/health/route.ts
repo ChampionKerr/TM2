@@ -46,19 +46,30 @@ export async function GET(_request: Request) {
   let dbStatus: HealthStatus['database'] = { status: 'error' }
   
   try {
-    // Test database connection and get basic stats
-    await prisma.$connect()
-    const userCount = await prisma.user.count()
-    const requestCount = await prisma.leaveRequest.count()
+    // Test database connection with timeout
+    const dbCheckStart = Date.now()
+    await Promise.race([
+      prisma.$queryRaw`SELECT 1`,
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Database timeout')), 5000)
+      )
+    ])
+    
+    // Get basic stats with error handling
+    const [userCount, requestCount] = await Promise.allSettled([
+      prisma.user.count(),
+      prisma.leaveRequest.count()
+    ])
     
     dbStatus = {
       status: 'connected',
-      latency: Date.now() - startTime,
-      users: userCount,
-      requests: requestCount
+      latency: Date.now() - dbCheckStart,
+      users: userCount.status === 'fulfilled' ? userCount.value : 0,
+      requests: requestCount.status === 'fulfilled' ? requestCount.value : 0
     }
   } catch (error) {
     logger.error('Health check database connection failed', { error })
+    dbStatus = { status: 'error' }
   }
 
   // System information
