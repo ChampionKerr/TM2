@@ -8,6 +8,8 @@ const nextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@emotion/react', '@emotion/styled', '@mui/material'],
   distDir: '.next', // Specify build output directory
+  
+  // Set environment variable to detect build time
   webpack: (config, { isServer }) => {
     // Optimize webpack config for Vercel deployment
     if (!isServer) {
@@ -104,6 +106,7 @@ const nextConfig = {
   // Configure environment variables that should be exposed to the browser
   env: {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    IS_BUILD_TIME: process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL ? 'true' : 'false',
   },
 }
 

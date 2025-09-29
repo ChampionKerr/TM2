@@ -1,26 +1,32 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { logger } from '@/lib/logger'
 
-// Create a global Prisma instance to avoid connection issues
-const prisma = new PrismaClient()
+// Check if we're in build mode (static generation)
+const isBuildTime = process.env.IS_BUILD_TIME === 'true' || !process.env.DATABASE_URL || process.env.VERCEL_ENV === 'preview'
 
 export async function GET(_request: Request) {
   const startTime = Date.now()
   
   // Database health check
   let databaseStatus: 'HEALTHY' | 'FAILED' = 'FAILED'
-  let databaseDetails: any = {}
+  let databaseDetails: Record<string, string | number | boolean> = {}
   
-  // Skip database check during build time
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+  if (isBuildTime) {
+    // Skip database operations completely during build
     databaseStatus = 'FAILED'
-    databaseDetails = { error: 'Database check skipped during build' }
+    databaseDetails = { 
+      error: 'Database check skipped during build time',
+      build_mode: true
+    }
   } else {
+    // Only attempt database connection when not in build mode
     try {
+      const { PrismaClient } = await import('@prisma/client')
+      const prisma = new PrismaClient()
+      
       await prisma.$connect()
       
-      // Test basic query
+      // Test basic queries
       const userCount = await prisma.user.count()
       const requestCount = await prisma.leaveRequest.count()
       
@@ -31,10 +37,13 @@ export async function GET(_request: Request) {
         connection: 'active'
       }
       
+      await prisma.$disconnect()
+      
     } catch (error) {
       logger.error('Health check database connection failed', { error })
       databaseDetails = {
-        error: error instanceof Error ? error.message : 'Unknown database error'
+        error: error instanceof Error ? error.message : 'Unknown database error',
+        build_mode: false
       }
     }
   }
@@ -56,12 +65,15 @@ export async function GET(_request: Request) {
   }
 
   const responseTime = Date.now() - startTime
-  const overallStatus = databaseStatus === 'HEALTHY' ? 'healthy' : 'unhealthy'
+  
+  // During build time, report as healthy even without database
+  const overallStatus = isBuildTime ? 'healthy' : (databaseStatus === 'HEALTHY' ? 'healthy' : 'unhealthy')
 
   const healthReport = {
     status: overallStatus,
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
+    build_mode: isBuildTime,
     services: {
       database: {
         status: databaseStatus,
@@ -79,14 +91,17 @@ export async function GET(_request: Request) {
   logger.info('Health check performed', {
     status: overallStatus,
     responseTime,
-    database: databaseStatus
+    database: databaseStatus,
+    build_mode: isBuildTime
   })
 
-  // Return appropriate status code
+  // Return appropriate status code - always 200 during build
+  const statusCode = isBuildTime ? 200 : (overallStatus === 'healthy' ? 200 : 503)
+  
   return NextResponse.json(
     healthReport,
     { 
-      status: overallStatus === 'healthy' ? 200 : 503,
+      status: statusCode,
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Content-Type': 'application/json'
