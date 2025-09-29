@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  relationMode = "foreignKeys"
+}
+
+model User {
+  id                   String         @id @default(uuid())
+  email                String         @unique
+  password             String
+  firstName            String
+  lastName             String
+  department           String?
+  role                 Role           @default(user)
+  passwordResetRequired Boolean        @default(false)
+  resetToken           String?        // Password reset token
+  resetTokenExpires    DateTime?      // Reset token expiration
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  vacationDays         Int            @default(20)  // Annual leave balance in days
+  sickDays            Int            @default(10)  // Sick leave balance in days
+  sessions             Session[]      // For session management
+  leaveRequests        LeaveRequest[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model LeaveRequest {
+  id            String      @id @default(uuid())
+  userId        String
+  type          LeaveType
+  startDate     DateTime
+  endDate       DateTime
+  reason        String?
+  status        LeaveStatus @default(Pending)
+  daysRequested Int     @map("days_requested")
+  requestedAt   DateTime    @default(now())
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("leave_requests")
+}
+
+enum Role {
+  admin
+  user
+}
+
+enum LeaveType {
+  Annual
+  Sick
+  Unpaid
+  Other
+}
+
+enum LeaveStatus {
+  Pending
+  Approved
+  Rejected
+}

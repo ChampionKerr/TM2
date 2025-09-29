@@ -1,0 +1,10 @@
+{
+  "github.copilot.chat.mcp.servers": {
+    "render": {
+      "url": "https://mcp.render.com/mcp",
+      "headers": {
+        "Authorization": "rnd_aMAjcqWdM4o5Wd3x8zKfj7fxmSzV"
+      }
+    }
+  }
+}

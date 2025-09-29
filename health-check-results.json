@@ -1,0 +1,91 @@
+{
+  "timestamp": "2025-09-27T02:33:42.690Z",
+  "healthy": false,
+  "summary": {
+    "total": 6,
+    "healthy": 4,
+    "warning": 1,
+    "unhealthy": 1
+  },
+  "results": [
+    {
+      "service": "Environment Variables",
+      "status": "healthy",
+      "message": "All required environment variables are set",
+      "details": {
+        "required": 3,
+        "optional": 0,
+        "missing_optional": [
+          "RESEND_API_KEY",
+          "REDIS_URL",
+          "SENTRY_DSN"
+        ]
+      },
+      "timestamp": "2025-09-27T02:33:42.066Z"
+    },
+    {
+      "service": "Optional Environment Variables",
+      "status": "warning",
+      "message": "Missing optional variables: RESEND_API_KEY, REDIS_URL, SENTRY_DSN",
+      "details": {
+        "missing": [
+          "RESEND_API_KEY",
+          "REDIS_URL",
+          "SENTRY_DSN"
+        ]
+      },
+      "timestamp": "2025-09-27T02:33:42.066Z"
+    },
+    {
+      "service": "Memory Usage",
+      "status": "healthy",
+      "message": "Memory usage normal: 91MB",
+      "details": {
+        "rss_mb": 91,
+        "heap_used_mb": 8,
+        "heap_total_mb": 17,
+        "external_mb": 3
+      },
+      "timestamp": "2025-09-27T02:33:42.068Z"
+    },
+    {
+      "service": "System Info",
+      "status": "healthy",
+      "message": "System information gathered",
+      "details": {
+        "platform": "linux",
+        "arch": "x64",
+        "node_version": "v18.19.1",
+        "uptime": 0,
+        "cpu_count": 12,
+        "total_memory_gb": 27,
+        "free_memory_gb": 20,
+        "load_average": [
+          0.56,
+          0.98,
+          1.23
+        ]
+      },
+      "timestamp": "2025-09-27T02:33:42.077Z"
+    },
+    {
+      "service": "Disk Space",
+      "status": "healthy",
+      "message": "Disk space check completed",
+      "details": {
+        "path": "/home/skerr1984/Timewise_chat_gpt/timewise-hrms-pro/timewise-hrms",
+        "accessible": true
+      },
+      "timestamp": "2025-09-27T02:33:42.077Z"
+    },
+    {
+      "service": "Database",
+      "status": "unhealthy",
+      "message": "Database connection failed",
+      "details": {
+        "error": "Error querying the database: FATAL: Tenant or user not found"
+      },
+      "timestamp": "2025-09-27T02:33:42.657Z"
+    }
+  ]
+}
