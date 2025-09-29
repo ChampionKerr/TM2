@@ -12,14 +12,13 @@ export async function GET(_request: Request) {
     NO_DATABASE_URL: !process.env.DATABASE_URL || process.env.DATABASE_URL === '',
     PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production',
     VERCEL_STATIC_GEN: process.env.VERCEL === '1' && process.env.NODE_ENV === 'production' && typeof process !== 'undefined' && process.argv?.includes('--prerender'),
-    // Critical: Check if we're in Next.js static generation phase
-    // During static generation, headers and request context may be limited
-    STATIC_GENERATION: typeof window === 'undefined' && 
-                       process.env.NODE_ENV === 'production' && 
+    // Critical: During Next.js static generation, we should always skip database
+    // If this is called during build/static generation, we're definitely in build mode
+    STATIC_GENERATION: process.env.NODE_ENV === 'production' && 
                        process.env.VERCEL === '1' &&
-                       // We're likely in static generation if this is being called without a real request context
-                       (_request.headers.get('user-agent') === null || 
-                        _request.headers.get('user-agent')?.includes('Next.js')),
+                       // During build time, treat any API route call as build-time
+                       !_request.headers.get('x-forwarded-for') && // No real client IP
+                       !_request.headers.get('cf-ray'), // No Cloudflare routing
     // Additional detection: during static generation, we may not have all runtime context
     MISSING_RUNTIME_CONTEXT: typeof globalThis === 'undefined' || typeof global === 'undefined'
   }
@@ -38,7 +37,9 @@ export async function GET(_request: Request) {
     REQUEST_HEADERS: {
       userAgent: _request.headers.get('user-agent'),
       host: _request.headers.get('host'),
-      xForwardedFor: _request.headers.get('x-forwarded-for')
+      xForwardedFor: _request.headers.get('x-forwarded-for'),
+      cfRay: _request.headers.get('cf-ray'),
+      hasRealClientHeaders: !!(_request.headers.get('x-forwarded-for') || _request.headers.get('cf-ray'))
     }
   })
   
