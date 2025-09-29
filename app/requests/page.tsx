@@ -104,7 +104,7 @@ export default function RequestsPage() {
                 <LeaveRequestsList 
                   userId={session.user.id} 
                   enablePagination={true}
-                  defaultPageSize={8}
+                  defaultPageSize={10}
                   key={refreshKey}
                 />
               ) : (

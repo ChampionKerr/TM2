@@ -72,11 +72,16 @@ const LeaveRequestsList: React.FC<LeaveRequestsListProps> = ({
   defaultPageSize = 10
 }) => {
   const { data: session } = useSession();
+  
+  // Ensure defaultPageSize is a valid option for MUI TablePagination
+  const validPageSizes = [5, 10, 25, 50];
+  const safeDefaultPageSize = validPageSizes.includes(defaultPageSize) ? defaultPageSize : 10;
+  
   const [requests, setRequests] = useState<LeaveRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(defaultPageSize);
+  const [rowsPerPage, setRowsPerPage] = useState(safeDefaultPageSize);
   const [totalRequests, setTotalRequests] = useState(0);
   const [reviewDialog, setReviewDialog] = useState<{
     open: boolean;
@@ -335,7 +340,7 @@ const LeaveRequestsList: React.FC<LeaveRequestsListProps> = ({
 
     {enablePagination && (
       <TablePagination
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rowsPerPageOptions={validPageSizes}
         component="div"
         count={totalRequests}
         rowsPerPage={rowsPerPage}
