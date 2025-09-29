@@ -34,6 +34,14 @@ interface HealthCheckResult {
 }
 
 async function checkDatabase(): Promise<HealthCheckResult['services']['database']> {
+  // Skip database check during build time
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    return {
+      status: 'disconnected',
+      error: 'Database check skipped during build'
+    };
+  }
+
   try {
     if (!prisma) {
       prisma = new PrismaClient();

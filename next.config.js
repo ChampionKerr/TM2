@@ -69,7 +69,7 @@ const nextConfig = {
     ];
   },
 
-  // Configure redirects for cleaner URLs
+    // Configure redirects for cleaner URLs
   async redirects() {
     return [
       {
@@ -78,6 +78,11 @@ const nextConfig = {
         permanent: false,
       },
     ];
+  },
+
+  // Ensure API routes are handled correctly
+  experimental: {
+    optimizeCss: true,
   },
 
   // Static export configuration for Vercel
