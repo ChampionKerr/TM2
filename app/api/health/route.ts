@@ -58,30 +58,34 @@ export async function GET(_request: Request) {
     // Only attempt database connection when not in build mode
     try {
       console.log('[HEALTH CHECK] Attempting database connection...')
-      const { PrismaClient } = await import('@prisma/client')
-      const prisma = new PrismaClient({
-        datasources: {
-          db: {
-            url: process.env.DATABASE_URL
-          }
+      
+      // Use enhanced connectivity test that tries both Supabase and Prisma
+      const { testDatabaseConnectivity } = await import('@/lib/supabase')
+      const connectivityResult = await testDatabaseConnectivity()
+      
+      if (connectivityResult.success) {
+        databaseStatus = 'HEALTHY'
+        databaseDetails = {
+          connection: 'active',
+          method: connectivityResult.method,
+          ...connectivityResult.details
         }
-      })
-      
-      await prisma.$connect()
-      
-      // Test basic queries
-      const userCount = await prisma.user.count()
-      const requestCount = await prisma.leaveRequest.count()
-      
-      databaseStatus = 'HEALTHY'
-      databaseDetails = {
-        userCount,
-        requestCount,
-        connection: 'active'
+        console.log(`[HEALTH CHECK] Database connection successful via ${connectivityResult.method}`)
+      } else {
+        console.error('[HEALTH CHECK] Database connection failed:', connectivityResult.error)
+        logger.error('Health check database connection failed', { 
+          error: connectivityResult.error,
+          method: connectivityResult.method,
+          details: connectivityResult.details
+        })
+        databaseDetails = {
+          error: connectivityResult.error || 'Unknown database error',
+          method: connectivityResult.method,
+          build_mode: false,
+          attempted_connection: true,
+          ...connectivityResult.details
+        }
       }
-      
-      console.log('[HEALTH CHECK] Database connection successful')
-      await prisma.$disconnect()
       
     } catch (error) {
       console.error('[HEALTH CHECK] Database connection failed:', error)
@@ -89,7 +93,8 @@ export async function GET(_request: Request) {
       databaseDetails = {
         error: error instanceof Error ? error.message : 'Unknown database error',
         build_mode: false,
-        attempted_connection: true
+        attempted_connection: true,
+        fallback_attempted: true
       }
     }
   }
