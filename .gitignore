@@ -14,9 +14,6 @@ dist/
 .env.production
 .env.vercel
 
-# Vercel deployment configuration
-vercel.json
-
 # Logs
 npm-debug.log*
 yarn-debug.log*
