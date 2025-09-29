@@ -14,6 +14,12 @@ const resend = resendApiKey ? new Resend(resendApiKey) : null;
 export async function sendEmail({ to, subject, react }: EmailOptions) {
   try {
     if (!resend || !resendApiKey) {
+      // In development or when email is not configured, just log and return success
+      if (process.env.NODE_ENV === 'development') {
+        logger.info('Email service not configured in development mode', { to, subject });
+        return { success: true, messageId: 'dev-mode-skip' };
+      }
+      
       logger.warn('Email service not configured - RESEND_API_KEY missing', { to, subject });
       return { success: false, error: 'Email service not configured' };
     }

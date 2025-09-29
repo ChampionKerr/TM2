@@ -7,16 +7,11 @@
   "devCommand": "npm run dev",
   "regions": ["iad1"],
   "env": {
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXTAUTH_URL": "@nextauth_url",
-    "DATABASE_URL": "@database_url",
-    "DIRECT_URL": "@direct_url"
+    "NODE_ENV": "production"
   },
   "build": {
     "env": {
-      "NEXTAUTH_SECRET": "@nextauth_secret",
-      "DATABASE_URL": "@database_url",
-      "DIRECT_URL": "@direct_url"
+      "NODE_ENV": "production"
     }
   },
   "functions": {
