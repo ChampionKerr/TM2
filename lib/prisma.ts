@@ -7,16 +7,13 @@ interface GlobalForPrisma {
 declare const globalThis: GlobalForPrisma & typeof global;
 
 // Check if we're in build mode to avoid database connections
-const isBuildTime = process.env.IS_BUILD_TIME === 'true' || 
-                    process.env.NEXT_PHASE === 'phase-production-build' ||
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build' ||
                     (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) ||
                     process.env.VERCEL_ENV === 'preview' ||
-                    // Vercel static generation detection - check if we're in Next.js build context
-                    (process.env.VERCEL === '1' && process.env.NODE_ENV === 'production' && typeof process !== 'undefined' && process.argv?.includes('--prerender')) ||
+                    // Only during actual build/compile time, not runtime
+                    (typeof process !== 'undefined' && process.argv?.some(arg => arg.includes('next-server'))) ||
                     // Additional detection: Check if we're being called from Next.js static generation
-                    (typeof process !== 'undefined' && process.env.__NEXT_PRIVATE_PREBUNDLED_REACT === 'next') ||
-                    // Check if we're in the Next.js build worker process
-                    (process.env.NODE_ENV === 'production' && typeof process !== 'undefined' && process.title?.includes('node'));
+                    (typeof process !== 'undefined' && process.env.__NEXT_PRIVATE_PREBUNDLED_REACT === 'next');
 
 // Render-specific database configuration
 const getDatabaseUrl = () => {

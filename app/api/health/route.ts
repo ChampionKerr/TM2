@@ -4,23 +4,24 @@ import { logger } from '@/lib/logger'
 export async function GET(_request: Request) {
   const startTime = Date.now()
   
-  // Enhanced build-time detection with logging
+  // Enhanced build-time detection with logging - RUNTIME AWARE
   const buildDetectionReasons = {
-    IS_BUILD_TIME: process.env.IS_BUILD_TIME === 'true',
+    // Only check NEXT_PHASE during actual build, not persistent env vars
     NEXT_PHASE_BUILD: process.env.NEXT_PHASE === 'phase-production-build',
     VERCEL_ENV_PREVIEW: process.env.VERCEL_ENV === 'preview', 
     NO_DATABASE_URL: !process.env.DATABASE_URL || process.env.DATABASE_URL === '',
     PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production',
-    VERCEL_STATIC_GEN: process.env.VERCEL === '1' && process.env.NODE_ENV === 'production' && typeof process !== 'undefined' && process.argv?.includes('--prerender'),
-    // Critical: During Next.js static generation, we should always skip database
-    // If this is called during build/static generation, we're definitely in build mode
+    // During static generation, we should have minimal request context
     STATIC_GENERATION: process.env.NODE_ENV === 'production' && 
                        process.env.VERCEL === '1' &&
                        // During build time, treat any API route call as build-time
                        !_request.headers.get('x-forwarded-for') && // No real client IP
-                       !_request.headers.get('cf-ray'), // No Cloudflare routing
-    // Additional detection: during static generation, we may not have all runtime context
-    MISSING_RUNTIME_CONTEXT: typeof globalThis === 'undefined' || typeof global === 'undefined'
+                       !_request.headers.get('cf-ray') && // No Cloudflare routing
+                       !_request.headers.get('x-vercel-id'), // No Vercel request ID
+    // Check if we're in actual compilation phase
+    COMPILATION_PHASE: typeof process !== 'undefined' && 
+                       (process.argv?.some(arg => arg.includes('next-server')) ||
+                        process.env.__NEXT_PRIVATE_PREBUNDLED_REACT === 'next')
   }
   
   const isBuildTime = Object.values(buildDetectionReasons).some(Boolean)
@@ -39,7 +40,8 @@ export async function GET(_request: Request) {
       host: _request.headers.get('host'),
       xForwardedFor: _request.headers.get('x-forwarded-for'),
       cfRay: _request.headers.get('cf-ray'),
-      hasRealClientHeaders: !!(_request.headers.get('x-forwarded-for') || _request.headers.get('cf-ray'))
+      xVercelId: _request.headers.get('x-vercel-id'),
+      hasRealClientHeaders: !!(_request.headers.get('x-forwarded-for') || _request.headers.get('cf-ray') || _request.headers.get('x-vercel-id'))
     }
   })
   
