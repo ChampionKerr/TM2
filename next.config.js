@@ -71,7 +71,7 @@ const nextConfig = {
     ];
   },
 
-    // Configure redirects for cleaner URLs
+  // Configure redirects for cleaner URLs
   async redirects() {
     return [
       {
@@ -82,7 +82,7 @@ const nextConfig = {
     ];
   },
 
-  // Ensure API routes are handled correctly
+  // Ensure API routes are handled correctly and enable optimizations
   experimental: {
     optimizeCss: true,
   },
@@ -106,7 +106,7 @@ const nextConfig = {
   // Configure environment variables that should be exposed to the browser
   env: {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    IS_BUILD_TIME: process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL ? 'true' : 'false',
+    IS_BUILD_TIME: process.env.IS_BUILD_TIME || (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL ? 'true' : 'false'),
   },
 }
 

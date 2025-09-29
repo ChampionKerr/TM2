@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "IS_BUILD_TIME=true prisma generate && IS_BUILD_TIME=true next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

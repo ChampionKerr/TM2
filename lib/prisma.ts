@@ -8,8 +8,11 @@ declare const globalThis: GlobalForPrisma & typeof global;
 
 // Check if we're in build mode to avoid database connections
 const isBuildTime = process.env.IS_BUILD_TIME === 'true' || 
+                    process.env.NEXT_PHASE === 'phase-production-build' ||
                     (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) ||
-                    process.env.VERCEL_ENV === 'preview';
+                    process.env.VERCEL_ENV === 'preview' ||
+                    // Vercel static generation detection
+                    (process.env.VERCEL === '1' && process.env.NODE_ENV === 'production' && typeof process !== 'undefined' && process.argv?.includes('--prerender'));
 
 // Render-specific database configuration
 const getDatabaseUrl = () => {

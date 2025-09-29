@@ -7,9 +7,21 @@ export async function GET(_request: Request) {
   // Enhanced build-time detection with logging
   const buildDetectionReasons = {
     IS_BUILD_TIME: process.env.IS_BUILD_TIME === 'true',
+    NEXT_PHASE_BUILD: process.env.NEXT_PHASE === 'phase-production-build',
     VERCEL_ENV_PREVIEW: process.env.VERCEL_ENV === 'preview', 
     NO_DATABASE_URL: !process.env.DATABASE_URL || process.env.DATABASE_URL === '',
-    PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production'
+    PRODUCTION_NO_VERCEL: typeof process.env.VERCEL === 'undefined' && process.env.NODE_ENV === 'production',
+    VERCEL_STATIC_GEN: process.env.VERCEL === '1' && process.env.NODE_ENV === 'production' && typeof process !== 'undefined' && process.argv?.includes('--prerender'),
+    // Critical: Check if we're in Next.js static generation phase
+    // During static generation, headers and request context may be limited
+    STATIC_GENERATION: typeof window === 'undefined' && 
+                       process.env.NODE_ENV === 'production' && 
+                       process.env.VERCEL === '1' &&
+                       // We're likely in static generation if this is being called without a real request context
+                       (_request.headers.get('user-agent') === null || 
+                        _request.headers.get('user-agent')?.includes('Next.js')),
+    // Additional detection: during static generation, we may not have all runtime context
+    MISSING_RUNTIME_CONTEXT: typeof globalThis === 'undefined' || typeof global === 'undefined'
   }
   
   const isBuildTime = Object.values(buildDetectionReasons).some(Boolean)
@@ -19,8 +31,15 @@ export async function GET(_request: Request) {
     isBuildTime,
     reasons: buildDetectionReasons,
     NODE_ENV: process.env.NODE_ENV,
+    NEXT_PHASE: process.env.NEXT_PHASE,
     VERCEL: process.env.VERCEL,
-    DATABASE_URL_EXISTS: !!process.env.DATABASE_URL
+    DATABASE_URL_EXISTS: !!process.env.DATABASE_URL,
+    PROCESS_ARGV: process.argv?.slice(-3), // Last 3 args for debugging
+    REQUEST_HEADERS: {
+      userAgent: _request.headers.get('user-agent'),
+      host: _request.headers.get('host'),
+      xForwardedFor: _request.headers.get('x-forwarded-for')
+    }
   })
   
   // Database health check
