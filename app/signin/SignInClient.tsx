@@ -3,7 +3,7 @@
 import { Box, Container, Paper, Typography } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
-import SignInForm from './SignInForm';
+import PasswordlessSignInForm from '@/components/PasswordlessSignInForm';
 import Logo from '@/components/Logo';
 
 export default function SignInClient() {
@@ -61,7 +61,7 @@ export default function SignInClient() {
               Sign in to TimeWise HRMS
             </Typography>
           </Box>
-          <SignInForm />
+          <PasswordlessSignInForm />
         </Paper>
       </Box>
     </Container>
