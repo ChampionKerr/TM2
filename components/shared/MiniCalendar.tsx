@@ -10,8 +10,7 @@ import {
 } from '@mui/material';
 import {
   ChevronLeft,
-  ChevronRight,
-  Event as EventIcon
+  ChevronRight
 } from '@mui/icons-material';
 import { 
   format, 

@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Container, AppBar } from '@mui/material';
+import { Box, Container } from '@mui/material';
 import ResponsiveAppBar from '@/components/ResponsiveAppBar';
 
 export default function EmployeesLayout({

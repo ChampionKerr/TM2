@@ -1,7 +1,7 @@
 // Render Health Check Service
 // This service provides comprehensive health monitoring for the Render deployment
 
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
 let prisma: PrismaClient | null = null;
@@ -77,7 +77,7 @@ function getEnvironmentInfo(): HealthCheckResult['services']['environment'] {
   };
 }
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(_request: Request): Promise<NextResponse> {
   try {
     const [databaseStatus] = await Promise.all([
       checkDatabase(),

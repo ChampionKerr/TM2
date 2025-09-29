@@ -10,8 +10,6 @@ import {
   Box, 
   Button, 
   CircularProgress,
-  Card,
-  CardContent,
   Avatar
 } from '@mui/material';
 import {
@@ -43,7 +41,18 @@ interface DashboardData {
     sick: number;
     used: { annual: number; sick: number };
   };
-  recentActivity: any[];
+  recentActivity: Array<{
+    id: string;
+    type: 'request_submitted' | 'request_approved' | 'request_rejected' | 'leave_started' | 'leave_ended';
+    title: string;
+    description: string;
+    timestamp: string;
+    status?: 'Pending' | 'Approved' | 'Rejected';
+    actor?: {
+      name: string;
+      avatar?: string;
+    };
+  }>;
 }
 
 export default function DashboardPage() {
@@ -87,7 +96,7 @@ export default function DashboardPage() {
     return null;
   }
 
-  const userRole = (session.user as any)?.role || 'user';
+  const userRole = session.user?.role || 'user';
   const theme = ROLE_THEMES[userRole as keyof typeof ROLE_THEMES];
   const layout = DASHBOARD_LAYOUT[userRole as keyof typeof DASHBOARD_LAYOUT];
 

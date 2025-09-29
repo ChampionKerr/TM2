@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 import { calculateWorkingDays } from '@/lib/utils/date-utils';
-import { LeaveType, LeaveStatus, Prisma } from '@prisma/client';
+import { LeaveType, LeaveStatus } from '@prisma/client';
 
 const leaveRequestSchema = z.object({
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -13,17 +13,13 @@ const leaveRequestSchema = z.object({
   reason: z.string().max(500).optional(),
 });
 
-const reviewRequestSchema = z.object({
-  requestId: z.string(),
-  status: z.nativeEnum(LeaveStatus).refine(
-    (status) => status === LeaveStatus.Approved || status === LeaveStatus.Rejected,
-    "Status must be either 'Approved' or 'Rejected'"
-  ),
-  reviewNote: z.string().max(500).optional(),
-});
-
 type CreateLeaveRequestInput = z.infer<typeof leaveRequestSchema>;
-type ReviewLeaveRequestInput = z.infer<typeof reviewRequestSchema>;
+
+interface ReviewLeaveRequestInput {
+  requestId: string;
+  status: LeaveStatus;
+  reviewNote?: string;
+}
 
 interface ServiceResult<T> {
   success: boolean;
@@ -297,7 +293,7 @@ export async function createLeaveRequest(data: CreateLeaveRequestInput): Promise
         status: LeaveStatus.Pending,
         daysRequested: workingDays,
         requestedAt: new Date(),
-      } as Prisma.LeaveRequestUncheckedCreateInput,
+      },
       include: {
         user: {
           select: {

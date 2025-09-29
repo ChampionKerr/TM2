@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 
-declare global {
-  var prisma: PrismaClient | undefined;
+interface GlobalForPrisma {
+  prisma: PrismaClient | undefined;
 }
+
+declare const globalThis: GlobalForPrisma & typeof global;
 
 // Render-specific database configuration
 const getDatabaseUrl = () => {

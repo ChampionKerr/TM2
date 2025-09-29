@@ -1,4 +1,3 @@
-import type { NextApiRequest } from 'next';
 import { getServerSession } from 'next-auth/next';
 import type { Session } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -57,7 +56,7 @@ export async function GET(req: Request) {
       status: 200,
       headers: { 'Content-Type': 'application/json' }
     });
-  } catch (error) {
+  } catch (_error) {
     return new Response(JSON.stringify({ error: 'Failed to fetch employee' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }
@@ -145,7 +144,7 @@ export async function DELETE(req: Request) {
     });
 
     return new Response(null, { status: 204 });
-  } catch (error) {
+  } catch (_error) {
     return new Response(JSON.stringify({ error: 'Failed to delete employee' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' }

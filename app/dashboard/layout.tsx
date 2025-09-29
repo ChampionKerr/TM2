@@ -1,7 +1,7 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { AppBar, Box, Container, CircularProgress } from '@mui/material';
+import { Container, Box, CircularProgress } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import ResponsiveAppBar from '@/components/ResponsiveAppBar';

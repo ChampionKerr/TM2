@@ -8,7 +8,6 @@ import {
   ListItemText,
   ListItemIcon,
   Avatar,
-  Chip,
   Divider,
   IconButton
 } from '@mui/material';
@@ -43,7 +42,7 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ activities, maxItems = 5, compact = false }: ActivityFeedProps) {
-  const getActivityIcon = (type: Activity['type'], status?: string) => {
+  const getActivityIcon = (type: Activity['type'], _status?: string) => {
     switch (type) {
       case 'request_submitted':
         return <SubmittedIcon color="info" />;

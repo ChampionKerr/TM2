@@ -26,6 +26,7 @@ import {
 } from '@mui/material';
 import { format } from 'date-fns';
 import { useSession } from 'next-auth/react';
+import type { Session } from 'next-auth';
 
 interface LeaveRequest {
   id: string;
@@ -138,7 +139,7 @@ const LeaveRequestsList: React.FC<LeaveRequestsListProps> = ({
     };
 
     fetchRequests();
-  }, [userId, limit, statusFilter, page, rowsPerPage, enablePagination]);
+  }, [userId, limit, statusFilter, page, rowsPerPage, enablePagination, showActions]);
 
   const handleReviewRequest = (request: LeaveRequest, action: 'approve' | 'reject') => {
     setReviewDialog({ open: true, request, action });
@@ -201,7 +202,7 @@ const LeaveRequestsList: React.FC<LeaveRequestsListProps> = ({
     setPage(0);
   };
 
-  const isAdmin = (session?.user as any)?.role === 'admin';
+  const isAdmin = (session?.user as Session['user'])?.role === 'admin';
   const canShowActions = showActions && isAdmin;
   
   // For display, use either paginated data or all data

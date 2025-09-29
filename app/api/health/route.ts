@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 
@@ -41,7 +41,7 @@ interface HealthStatus {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: Request) {
   const startTime = Date.now()
   let dbStatus: HealthStatus['database'] = { status: 'error' }
   

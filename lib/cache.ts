@@ -4,7 +4,7 @@ type CacheItem<T> = {
 };
 
 export class Cache {
-  private cache = new Map<string, CacheItem<any>>();
+  private cache = new Map<string, CacheItem<unknown>>();
   private defaultTTL = 5 * 60 * 1000; // 5 minutes
 
   async get<T>(key: string): Promise<T | null> {
