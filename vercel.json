@@ -7,9 +7,9 @@
   "devCommand": "npm run dev",
   "regions": ["iad1"],
   "functions": {
-    "node": "18.x",
     "app/api/**/*.ts": {
-      "maxDuration": 10
+      "maxDuration": 10,
+      "runtime": "nodejs18.x"
     }
   },
   "env": {
