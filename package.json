@@ -25,6 +25,7 @@
     "db:reset": "prisma migrate reset --force && npm run prisma:seed",
     "db:setup": "prisma generate && prisma db push && npm run prisma:seed",
     "db:test": "npx tsx scripts/test-enhanced-connection.ts",
+    "db:test-auth": "npx tsx scripts/comprehensive-login-test.ts",
     "docs:build": "echo 'API docs available at /api-docs endpoint'",
     "validate": "tsc --noEmit && eslint . && prettier --check .",
     "format": "prettier --write .",

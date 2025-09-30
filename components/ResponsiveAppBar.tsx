@@ -20,7 +20,8 @@ import type { Session } from 'next-auth';
 import { useRouter } from 'next/navigation';
 import Logo from './Logo';
 
-const pages = ['Dashboard', 'Requests', 'Employees'];
+const pages = ['Dashboard', 'Requests'];
+const adminPages = ['Dashboard', 'Requests', 'Employees'];
 const settings = ['Profile', 'Settings', 'Sign Out'];
 
 export default function ResponsiveAppBar() {
@@ -30,8 +31,9 @@ export default function ResponsiveAppBar() {
   const router = useRouter();
 
   // Dynamic pages based on user role
-    const isAdmin = session?.user?.role === 'admin';
-  const dynamicPages = isAdmin ? [...pages, 'Admin'] : pages;
+  const isAdmin = session?.user?.role === 'admin';
+  const basePagesForRole = isAdmin ? adminPages : pages;
+  const dynamicPages = isAdmin ? [...basePagesForRole, 'Analytics', 'Admin'] : basePagesForRole;
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);

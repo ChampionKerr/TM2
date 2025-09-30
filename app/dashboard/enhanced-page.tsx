@@ -1,4 +1,4 @@
-// Enhanced Dashboard with Team Tab for Users and Analytics for Admins
+// Enhanced Dashboard Integration with New UI Components
 'use client'
 
 import { useSession } from 'next-auth/react'
@@ -30,7 +30,7 @@ import LeaveRequestsList from '@/components/LeaveRequestsList'
 import { StatsCard } from '@/components/shared/StatsCard'
 import { QuickActions } from '@/components/shared/QuickActions'
 import { ActivityFeed } from '@/components/shared/ActivityFeed'
-import { CalendarWidget } from '@/components/shared/CalendarWidget'
+import { MiniCalendar } from '@/components/shared/MiniCalendar'
 import { LeaveCalendar } from '@/components/shared/LeaveCalendar'
 import { LeaveAnalytics } from '@/components/shared/LeaveAnalytics'
 import { EmployeeProfile } from '@/components/shared/EmployeeProfile'
@@ -70,7 +70,7 @@ interface DashboardData {
   upcomingLeave: number
 }
 
-export default function DashboardPage() {
+export default function EnhancedDashboardPage() {
   const { data: session, status } = useSession() as { data: Session | null, status: 'authenticated' | 'loading' | 'unauthenticated' }
   const router = useRouter()
   const theme = useTheme()
@@ -78,22 +78,12 @@ export default function DashboardPage() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentTab, setCurrentTab] = useState(0)
-  const [calendarEvents, setCalendarEvents] = useState<Array<{
-    id: string;
-    employeeName: string;
-    type: 'Annual' | 'Sick' | 'Unpaid' | 'Other';
-    startDate: string;
-    endDate: string;
-    status: 'Pending' | 'Approved' | 'Rejected';
-    isCurrentUser?: boolean;
-  }>>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       if (!session?.user) return
       
       try {
-        // Fetch dashboard analytics
         const response = await fetch('/api/analytics/dashboard')
         if (response.ok) {
           const data = await response.json()
@@ -124,21 +114,6 @@ export default function DashboardPage() {
             upcomingLeave: 1
           })
         }
-
-        // Fetch calendar events for current month
-        const currentDate = new Date()
-        const calendarParams = new URLSearchParams({
-          month: (currentDate.getMonth() + 1).toString(),
-          year: currentDate.getFullYear().toString(),
-          ...(session.user?.role === 'admin' && { includeTeam: 'true' })
-        })
-        
-        const calendarResponse = await fetch(`/api/calendar/events?${calendarParams}`)
-        if (calendarResponse.ok) {
-          const calendarData = await calendarResponse.json()
-          setCalendarEvents(calendarData.events || [])
-        }
-        
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error)
         // Set fallback data
@@ -231,16 +206,6 @@ export default function DashboardPage() {
           </Box>
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 1 }}>
-              {userRole === 'admin' && (
-                <Button
-                  variant="contained"
-                  sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
-                  startIcon={<Analytics />}
-                  onClick={() => router.push('/analytics')}
-                >
-                  Analytics
-                </Button>
-              )}
               <Button
                 variant="contained"
                 sx={{ bgcolor: 'rgba(255,255,255,0.2)', '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' } }}
@@ -263,7 +228,7 @@ export default function DashboardPage() {
           scrollButtons="auto"
         >
           <Tab icon={<DashboardIcon />} label="Overview" />
-          {userRole === 'admin' && <Tab icon={<Analytics />} label="Analytics" />}
+          <Tab icon={<Analytics />} label="Analytics" />
           <Tab icon={<CalendarIcon />} label="Calendar" />
           {userRole === 'admin' ? (
             <Tab icon={<PersonPin />} label="Profile" />
@@ -330,8 +295,8 @@ export default function DashboardPage() {
                   pendingRequests={dashboardData?.overview.pendingRequests}
                   upcomingLeave={dashboardData?.upcomingLeave}
                   onViewRequests={() => router.push('/requests')}
-                  onViewTeamCalendar={() => setCurrentTab(userRole === 'admin' ? 2 : 1)}
-                  onUpdateProfile={() => setCurrentTab(userRole === 'admin' ? 3 : 2)}
+                  onViewTeamCalendar={() => setCurrentTab(2)}
+                  onUpdateProfile={() => setCurrentTab(3)}
                 />
               </Grid>
 
@@ -446,17 +411,11 @@ export default function DashboardPage() {
                 </Paper>
               </Grid>
 
-              {/* Enhanced Calendar Widget */}
+              {/* Mini Calendar */}
               <Grid item xs={12}>
-                <CalendarWidget
-                  onDateClick={(date) => {
-                    setCurrentTab(userRole === 'admin' ? 2 : 1);
-                    console.log('Date clicked:', date);
-                  }}
-                  onViewFullCalendar={() => setCurrentTab(userRole === 'admin' ? 2 : 1)}
-                  showTeamLeave={userRole === 'admin'}
-                  compact={isMobile}
-                  events={calendarEvents}
+                <MiniCalendar 
+                  events={[]} 
+                  onDateClick={(date) => console.log('Date clicked:', date)}
                 />
               </Grid>
 
@@ -473,26 +432,23 @@ export default function DashboardPage() {
         </Grid>
       </TabPanel>
 
-      {userRole === 'admin' && (
-        <TabPanel value={currentTab} index={1}>
-          {/* Analytics Tab - Only for Admins */}
-          <LeaveAnalytics 
-            userId={session.user.id}
-            employeeName={`${session.user?.firstName || ''} ${session.user?.lastName || ''}`.trim()}
-          />
-        </TabPanel>
-      )}
+      <TabPanel value={currentTab} index={1}>
+        {/* Analytics Tab */}
+        <LeaveAnalytics 
+          userId={session.user.id}
+          employeeName={`${session.user?.firstName || ''} ${session.user?.lastName || ''}`.trim()}
+        />
+      </TabPanel>
 
-      <TabPanel value={currentTab} index={userRole === 'admin' ? 2 : 1}>
+      <TabPanel value={currentTab} index={2}>
         {/* Calendar Tab */}
         <LeaveCalendar 
           userId={session.user.id}
           showTeamLeave={userRole === 'admin'}
-          onNewRequest={() => router.push('/requests')}
         />
       </TabPanel>
 
-      <TabPanel value={currentTab} index={userRole === 'admin' ? 3 : 2}>
+      <TabPanel value={currentTab} index={3}>
         {/* Team/Profile Tab */}
         {userRole === 'admin' ? (
           <EmployeeProfile 
