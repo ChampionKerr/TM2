@@ -1,8 +1,12 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { fireEvent } from '@testing-library/dom';
 import LeaveRequestForm from '../components/LeaveRequestForm';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+
+
 
 // Wrap component with LocalizationProvider for date picker
 const renderWithProviders = (ui: React.ReactElement) => {

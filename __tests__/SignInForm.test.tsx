@@ -1,5 +1,8 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { fireEvent } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import SignInForm from '../app/signin/SignInForm';
 import { signIn } from 'next-auth/react';
 
