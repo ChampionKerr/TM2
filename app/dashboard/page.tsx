@@ -310,7 +310,7 @@ export default function DashboardPage() {
               <Grid item xs={12} sm={6} md={3}>
                 <StatsCard
                   title="Available Days"
-                  value={(dashboardData?.leaveBalance.annual || 20) - (dashboardData?.leaveBalance.used.annual || 0)}
+                  value={(dashboardData?.leaveBalance?.annual || 20) - (dashboardData?.leaveBalance?.used?.annual || 0)}
                   subtitle="Annual leave remaining"
                   loading={loading}
                   color="success"
@@ -384,10 +384,10 @@ export default function DashboardPage() {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                       <Typography variant="h4" color="primary.main" fontWeight="bold">
-                        {(dashboardData?.leaveBalance.annual || 20) - (dashboardData?.leaveBalance.used.annual || 0)}
+                        {(dashboardData?.leaveBalance?.annual || 20) - (dashboardData?.leaveBalance?.used?.annual || 0)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        / {dashboardData?.leaveBalance.annual || 20} days
+                        / {dashboardData?.leaveBalance?.annual || 20} days
                       </Typography>
                     </Box>
                     <Box 
@@ -402,7 +402,7 @@ export default function DashboardPage() {
                     >
                       <Box 
                         sx={{ 
-                          width: `${((dashboardData?.leaveBalance.used.annual || 0) / (dashboardData?.leaveBalance.annual || 20)) * 100}%`, 
+                          width: `${((dashboardData?.leaveBalance?.used?.annual || 0) / (dashboardData?.leaveBalance?.annual || 20)) * 100}%`, 
                           height: '100%', 
                           bgcolor: 'primary.main',
                           transition: 'width 0.3s ease'
@@ -417,10 +417,10 @@ export default function DashboardPage() {
                     </Typography>
                     <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1 }}>
                       <Typography variant="h4" color="success.main" fontWeight="bold">
-                        {(dashboardData?.leaveBalance.sick || 14) - (dashboardData?.leaveBalance.used.sick || 0)}
+                        {(dashboardData?.leaveBalance?.sick || 14) - (dashboardData?.leaveBalance?.used?.sick || 0)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        / {dashboardData?.leaveBalance.sick || 14} days
+                        / {dashboardData?.leaveBalance?.sick || 14} days
                       </Typography>
                     </Box>
                     <Box 
@@ -435,7 +435,7 @@ export default function DashboardPage() {
                     >
                       <Box 
                         sx={{ 
-                          width: `${((dashboardData?.leaveBalance.used.sick || 0) / (dashboardData?.leaveBalance.sick || 14)) * 100}%`, 
+                          width: `${((dashboardData?.leaveBalance?.used?.sick || 0) / (dashboardData?.leaveBalance?.sick || 14)) * 100}%`, 
                           height: '100%', 
                           bgcolor: 'success.main',
                           transition: 'width 0.3s ease'
@@ -505,10 +505,10 @@ export default function DashboardPage() {
               phone: '',
               address: '',
               startDate: '2024-01-15',
-              vacationDays: dashboardData?.leaveBalance.annual || 20,
-              sickDays: dashboardData?.leaveBalance.sick || 14,
-              usedVacation: dashboardData?.leaveBalance.used.annual || 0,
-              usedSick: dashboardData?.leaveBalance.used.sick || 0
+              vacationDays: dashboardData?.leaveBalance?.annual || 20,
+              sickDays: dashboardData?.leaveBalance?.sick || 14,
+              usedVacation: dashboardData?.leaveBalance?.used?.annual || 0,
+              usedSick: dashboardData?.leaveBalance?.used?.sick || 0
             }}
           />
         ) : (
