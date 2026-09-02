@@ -6,10 +6,10 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { requestId: string } }
+  { params }: { params: Promise<{ requestId: string }> }
 ) {
   try {
-    const { requestId } = params;
+    const { requestId } = await params;
     
     if (!requestId) {
       return NextResponse.json(
@@ -62,10 +62,10 @@ const requestSchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { requestId: string } }
+  { params }: { params: Promise<{ requestId: string }> }
 ) {
   try {
-    const { requestId } = params;
+    const { requestId } = await params;
     
     if (!requestId) {
       return NextResponse.json(

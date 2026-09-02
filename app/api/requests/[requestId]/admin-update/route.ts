@@ -5,11 +5,16 @@ import { prisma } from '@/lib/prisma'
 import { logger } from '@/lib/logger'
 import { LeaveType, LeaveStatus } from '@prisma/client'
 
+interface RouteParams {
+  params: Promise<{ requestId: string }>
+}
+
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { requestId: string } }
+  { params }: RouteParams
 ) {
   try {
+    const { requestId } = await params
     const session = await getServerSession(authOptions)
 
     if (!session?.user?.id) {
@@ -27,7 +32,6 @@ export async function PUT(
       )
     }
 
-    const requestId = params.requestId
     const body = await request.json()
     const { type, startDate, endDate, reason, days_requested, status } = body
 
@@ -52,35 +56,17 @@ export async function PUT(
       )
     }
 
-    // Prepare update data
-    const updateData: {
-      type: LeaveType
-      startDate: Date
-      endDate: Date
-      reason: string
-      daysRequested: number
-      status?: LeaveStatus
-      reviewedAt?: Date
-      reviewedBy?: string
-    } = {
-      type: type as LeaveType,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      reason,
-      daysRequested: days_requested
-    }
-
-    // If status is being changed, update review fields
-    if (status && status !== existingRequest.status) {
-      updateData.status = status as LeaveStatus
-      updateData.reviewedAt = new Date()
-      updateData.reviewedBy = session.user.id
-    }
-
-    // Update the request
+    // Update the leave request
     const updatedRequest = await prisma.leaveRequest.update({
       where: { id: requestId },
-      data: updateData,
+      data: {
+        type: type || existingRequest.type,
+        startDate: startDate ? new Date(startDate) : existingRequest.startDate,
+        endDate: endDate ? new Date(endDate) : existingRequest.endDate,
+        reason: reason || existingRequest.reason,
+        daysRequested: days_requested || existingRequest.daysRequested,
+        status: status || existingRequest.status
+      },
       include: {
         user: {
           select: {
@@ -95,25 +81,14 @@ export async function PUT(
     logger.info('Leave request updated by admin', {
       requestId,
       adminId: session.user.id,
-      originalStatus: existingRequest.status,
-      newStatus: status,
-      employeeId: existingRequest.userId,
-      type,
-      startDate,
-      endDate,
-      daysRequested: days_requested
+      changes: { type, status, days_requested }
     })
 
-    return NextResponse.json({
-      success: true,
-      message: 'Request updated successfully',
-      request: updatedRequest
-    })
-
+    return NextResponse.json(updatedRequest, { status: 200 })
   } catch (error) {
-    logger.error('Error updating leave request (admin)', { error })
+    logger.error('Error updating leave request', { error })
     return NextResponse.json(
-      { error: 'Failed to update request' },
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

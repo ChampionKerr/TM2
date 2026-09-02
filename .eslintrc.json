@@ -3,16 +3,11 @@
     "next/core-web-vitals",
     "next/typescript"
   ],
-  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "plugins": [
-    "@typescript-eslint"
-  ],
   "rules": {
-    // TypeScript strict rules - WARNING level for production readiness
     "@typescript-eslint/no-explicit-any": "warn",
     "@typescript-eslint/no-unused-vars": ["warn", { 
       "argsIgnorePattern": "^_",
@@ -21,23 +16,15 @@
       "ignoreRestSiblings": true
     }],
     "@typescript-eslint/no-non-null-assertion": "warn",
-    
-    // React hooks rules
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    
-    // Critical security and runtime errors
     "no-debugger": "error",
     "no-alert": "error", 
     "no-eval": "error",
     "no-var": "error",
     "prefer-const": "warn",
     "eqeqeq": ["error", "always"],
-    
-    // Console statements allowed in production
     "no-console": "off",
-    
-    // React/JSX rules - relaxed for production
     "react/no-unescaped-entities": "warn",
     "react/jsx-no-target-blank": "error",
     "react/display-name": "off"

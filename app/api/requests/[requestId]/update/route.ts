@@ -7,7 +7,7 @@ import { LeaveType } from '@prisma/client'
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { requestId: string } }
+  { params }: { params: Promise<{ requestId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -19,7 +19,7 @@ export async function PUT(
       )
     }
 
-    const requestId = params.requestId
+    const { requestId } = await params
     const body = await request.json()
     const { type, startDate, endDate, reason, days_requested } = body
 
