@@ -48,13 +48,16 @@ const FeatureCard = ({
       }}
     >
       <CardContent sx={{ flexGrow: 1, textAlign: 'center' }}>
-        <Icon
-          sx={{
-            fontSize: 48,
-            color: 'primary.main',
-            mb: 2,
-          }}
-        />
+        <Box sx={{ mb: 2 }}>
+          <Icon
+            sx={{
+              fontSize: 64,
+              color: 'primary.main',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
+        </Box>
         <Typography
           variant="h6"
           component="div"
@@ -116,9 +119,11 @@ export default function LandingPage() {
         sx={{
           backgroundColor: '#fff',
           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-          position: 'sticky',
+          position: 'fixed',
           top: 0,
-          zIndex: 100,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
         }}
       >
         <Container maxWidth="lg">
@@ -163,6 +168,7 @@ export default function LandingPage() {
         sx={{
           background: `linear-gradient(135deg, ${theme.palette.primary.main}15 0%, ${theme.palette.secondary.main}15 100%)`,
           py: isMobile ? 6 : 10,
+          pt: isMobile ? 12 : 14,
           position: 'relative',
           overflow: 'hidden',
         }}
