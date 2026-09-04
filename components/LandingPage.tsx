@@ -398,7 +398,7 @@ export default function LandingPage() {
                 opacity: 0.95,
               }}
             >
-              Join hundreds of organizations using TimeWise to streamline their HR processes.
+              Be among the first to experience modern HRMS solutions for your organization.
             </Typography>
             <Box sx={{ pt: 2 }}>
               <Button
