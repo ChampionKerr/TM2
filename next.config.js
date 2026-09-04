@@ -90,7 +90,6 @@ const nextConfig = {
   // Static export configuration for Vercel
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
-  output: 'standalone',
 
   // Enable TypeScript type checking during build
   typescript: {
