@@ -60,7 +60,7 @@ export default function AboutPage() {
                 Our Mission
               </Typography>
               <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8, fontSize: '1.05rem' }}>
-                To empower organizations with intelligent HR solutions that save time, reduce complexity, and enable data-driven decision-making. We believe that great HR management is the foundation for organizational success.
+                To eliminate HR busywork. We're building TimeWise so HR teams can stop drowning in spreadsheets and start making decisions that grow their business and create better workplaces.
               </Typography>
             </Paper>
 
@@ -70,7 +70,7 @@ export default function AboutPage() {
                 Our Vision
               </Typography>
               <Typography variant="body1" sx={{ color: '#666', lineHeight: 1.8, fontSize: '1.05rem' }}>
-                To be the leading HRMS platform that organizations trust to manage their most important asset—their people. We envision a world where HR professionals can focus on strategic initiatives rather than administrative tasks.
+                Every organization—from startups to enterprises—should have access to world-class HR technology. TimeWise levels the playing field, giving every company the tools to manage people like the best companies do.
               </Typography>
             </Paper>
 

@@ -69,10 +69,10 @@ export default function ContactPage() {
             {/* Header */}
             <Box sx={{ textAlign: 'center', mb: 2 }}>
               <Typography variant="h3" sx={{ fontWeight: 700, mb: 2, color: '#1a237e' }}>
-                Get In Touch
+                Let's Talk HR
               </Typography>
               <Typography variant="h6" sx={{ color: '#666', lineHeight: 1.8, maxWidth: '600px', mx: 'auto' }}>
-                We'd love to hear from you. Send us a message and we'll respond as quickly as possible.
+                Have questions about TimeWise? Want to see a demo or discuss your HR needs? Our team is here to help. Respond within 1 business hour.
               </Typography>
             </Box>
 

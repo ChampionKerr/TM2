@@ -82,32 +82,32 @@ export default function LandingPage() {
     {
       icon: PeopleIcon,
       title: 'Employee Management',
-      description: 'Manage employee records, profiles, and organizational structure efficiently.',
+      description: 'Keep all employee information in one secure location. Onboard, manage, and organize your entire workforce with ease.',
     },
     {
       icon: AccessTimeIcon,
       title: 'Leave Management',
-      description: 'Track leave requests, approvals, and balance with multi-tier workflows.',
+      description: 'Eliminate spreadsheets. Streamline leave requests with automatic approvals and real-time balance tracking.',
     },
     {
       icon: CalendarMonthIcon,
       title: 'Attendance Tracking',
-      description: 'Monitor attendance patterns and generate detailed reports.',
+      description: 'Track attendance automatically and identify trends instantly. Make informed decisions backed by data.',
     },
     {
       icon: BarChartIcon,
       title: 'Analytics & Reports',
-      description: 'Comprehensive dashboards and customizable analytics for data-driven decisions.',
+      description: 'Get actionable insights with beautiful dashboards. Visualize your HR metrics and make smarter decisions.',
     },
     {
       icon: TrendingUpIcon,
       title: 'Payroll Export',
-      description: 'Export payroll data and leave summaries with a single click.',
+      description: 'Generate payroll reports in seconds. Reduce errors and save hours on manual data preparation.',
     },
     {
       icon: CheckCircleIcon,
       title: 'Approval Workflows',
-      description: 'Multi-tier approval workflows for leave, overtime, and administrative tasks.',
+      description: 'Set your own rules. Custom workflows ensure every request flows through the right approvers automatically.',
     },
   ];
 
@@ -186,7 +186,7 @@ export default function LandingPage() {
                     lineHeight: 1.2,
                   }}
                 >
-                  Manage Your Workforce with TimeWise
+                  Stop Wasting Time on HR Paperwork
                 </Typography>
                 <Typography
                   variant="h6"
@@ -196,7 +196,7 @@ export default function LandingPage() {
                     lineHeight: 1.6,
                   }}
                 >
-                  A comprehensive Human Resource Management System designed to streamline employee management, leave tracking, and payroll operations.
+                  TimeWise automates HR operations so you can focus on what matters: growing your business and building a strong team. Manage employees, track leave, and generate reports—all in one powerful platform.
                 </Typography>
                 <Stack direction="row" spacing={2} sx={{ pt: 2 }}>
                   <Button
@@ -209,7 +209,7 @@ export default function LandingPage() {
                       fontSize: '1.1rem',
                     }}
                   >
-                    Get Started
+                    Get Started Free
                   </Button>
                   <Button
                     variant="outlined"
@@ -389,7 +389,7 @@ export default function LandingPage() {
                 fontWeight: 700,
               }}
             >
-              Ready to Transform Your HR Operations?
+              Save Hours Every Week on HR Tasks
             </Typography>
             <Typography
               variant="body1"
@@ -398,7 +398,7 @@ export default function LandingPage() {
                 opacity: 0.95,
               }}
             >
-              Be among the first to experience modern HRMS solutions for your organization.
+              Join early adopters reducing HR workload by 70%. Get TimeWise free for 30 days—no credit card required.
             </Typography>
             <Box sx={{ pt: 2 }}>
               <Button
@@ -417,7 +417,7 @@ export default function LandingPage() {
                   },
                 }}
               >
-                Get Started Now
+                Start Free Trial
               </Button>
             </Box>
           </Stack>
