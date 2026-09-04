@@ -465,12 +465,18 @@ export default function LandingPage() {
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   Company
                 </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                <Button
+                  onClick={() => router.push('/about')}
+                  sx={{ justifyContent: 'flex-start', p: 0, textTransform: 'none', fontSize: '0.875rem', color: '#fff', opacity: 0.8, '&:hover': { opacity: 1 } }}
+                >
                   About
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                </Button>
+                <Button
+                  onClick={() => router.push('/contact')}
+                  sx={{ justifyContent: 'flex-start', p: 0, textTransform: 'none', fontSize: '0.875rem', color: '#fff', opacity: 0.8, '&:hover': { opacity: 1 } }}
+                >
                   Contact
-                </Typography>
+                </Button>
               </Stack>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
@@ -478,12 +484,18 @@ export default function LandingPage() {
                 <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
                   Legal
                 </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                <Button
+                  onClick={() => router.push('/privacy')}
+                  sx={{ justifyContent: 'flex-start', p: 0, textTransform: 'none', fontSize: '0.875rem', color: '#fff', opacity: 0.8, '&:hover': { opacity: 1 } }}
+                >
                   Privacy
-                </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                </Button>
+                <Button
+                  onClick={() => router.push('/terms')}
+                  sx={{ justifyContent: 'flex-start', p: 0, textTransform: 'none', fontSize: '0.875rem', color: '#fff', opacity: 0.8, '&:hover': { opacity: 1 } }}
+                >
                   Terms
-                </Typography>
+                </Button>
               </Stack>
             </Grid>
           </Grid>
