@@ -121,12 +121,20 @@ const LeaveRequestsList: React.FC<LeaveRequestsListProps> = ({
         const response = await fetch(`/api/requests?${queryParams.toString()}`);
         console.log('LeaveRequestsList: Response status:', response.status);
 
+        // Check response status before parsing JSON
+        if (!response.ok) {
+          // Try to parse error as JSON, otherwise use status text
+          try {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to fetch leave requests');
+          } catch (parseError) {
+            // If not JSON, it might be an error page (HTML)
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+          }
+        }
+
         const data = await response.json();
         console.log('LeaveRequestsList: Response data:', data);
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch leave requests');
-        }
 
         if (enablePagination && data.pagination) {
           setRequests(data.requests || []);
@@ -172,9 +180,14 @@ const LeaveRequestsList: React.FC<LeaveRequestsListProps> = ({
         }),
       });
 
+      // Check response status before parsing JSON
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to review request');
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to review request');
+        } catch (parseError) {
+          throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
       }
 
       // Refresh the requests list
@@ -184,8 +197,12 @@ const LeaveRequestsList: React.FC<LeaveRequestsListProps> = ({
 
       const refreshResponse = await fetch(`/api/requests?${queryParams.toString()}`);
       if (refreshResponse.ok) {
-        const refreshData = await refreshResponse.json();
-        setRequests(refreshData);
+        try {
+          const refreshData = await refreshResponse.json();
+          setRequests(refreshData);
+        } catch (parseError) {
+          console.error('Error parsing refresh response:', parseError);
+        }
       }
 
       handleCloseDialog();
