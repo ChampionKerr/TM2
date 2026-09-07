@@ -94,7 +94,9 @@ export async function middleware(request: NextRequest) {
   // 3. Check for password reset requirement on page routes
   if (request.nextUrl.pathname.startsWith('/dashboard') ||
       request.nextUrl.pathname.startsWith('/employees') ||
-      request.nextUrl.pathname.startsWith('/requests')) {
+      request.nextUrl.pathname.startsWith('/requests') ||
+      request.nextUrl.pathname.startsWith('/profile') ||
+      request.nextUrl.pathname.startsWith('/settings')) {
     
     const token = await getToken({ 
       req: request,

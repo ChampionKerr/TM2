@@ -14,6 +14,8 @@ model User {
   password             String
   firstName            String
   lastName             String
+  phone                String?
+  company              String?
   department           String?
   role                 Role           @default(user)
   passwordResetRequired Boolean        @default(false)
