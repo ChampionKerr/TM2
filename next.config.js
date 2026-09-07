@@ -1,29 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Production optimizations
-  productionBrowserSourceMaps: false, // Disable source maps in production for better performance
-  compress: true, // Enable gzip compression
-  generateEtags: true, // Enable ETag generation
-  poweredByHeader: false, // Remove X-Powered-By header
+  productionBrowserSourceMaps: false,
+  compress: true,
+  generateEtags: true,
+  poweredByHeader: false,
   reactStrictMode: true,
   transpilePackages: ['@emotion/react', '@emotion/styled', '@mui/material'],
-  distDir: '.next', // Specify build output directory
-  
-  // Set environment variable to detect build time
-  webpack: (config, { isServer }) => {
-    // Optimize webpack config for Vercel deployment
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
-    }
-    return config;
-  },
+  distDir: '.next',
 
-  // Ensure API routes are handled correctly
   experimental: {
     optimizeCss: true,
   },
@@ -60,7 +45,7 @@ const nextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.vercel.app"
+            value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://*.vercel.app; frame-ancestors 'none'"
           },
           {
             key: 'X-XSS-Protection',
@@ -94,12 +79,6 @@ const nextConfig = {
   // Enable TypeScript type checking during build
   typescript: {
     ignoreBuildErrors: false,
-  },
-  
-  // Enable ESLint during build with strict checking
-  eslint: {
-    ignoreDuringBuilds: false,
-    dirs: ['app', 'components', 'lib', 'types'],
   },
 
   // Configure environment variables that should be exposed to the browser

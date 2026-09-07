@@ -10,14 +10,14 @@ const loginSchema = z.object({
 });
 
 export const authOptions = {
-  debug: true,
+  debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt' as const,
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 24 * 60 * 60, // 24 hours
   },
   jwt: {
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 24 * 60 * 60, // 24 hours
   },
   pages: {
     signIn: '/signin',
@@ -32,10 +32,7 @@ export const authOptions = {
       },
       async authorize(credentials: any) {
         try {
-          console.log('Auth attempt for:', credentials?.email);
-          
           if (!credentials) {
-            console.error('No credentials provided');
             return null;
           }
 
@@ -54,18 +51,13 @@ export const authOptions = {
             }
           });
 
-          console.log('User found:', user ? 'yes' : 'no');
-
           if (!user?.password) {
-            console.error('No user found or password not set:', email);
             return null;
           }
 
           const isValid = await bcrypt.compare(password, user.password);
-          console.log('Password valid:', isValid);
           
           if (!isValid) {
-            console.error('Invalid password for user:', email);
             return null;
           }
 
@@ -78,10 +70,8 @@ export const authOptions = {
             passwordResetRequired: user.passwordResetRequired,
           };
 
-          console.log('Auth successful for:', email, 'Password reset required:', user.passwordResetRequired);
           return authUser;
         } catch (error) {
-          console.error('Authentication error:', error);
           return null;
         }
       }

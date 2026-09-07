@@ -50,7 +50,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ message: 'Password reset successful' });
   } catch (error) {
-    console.error('Password reset error:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: error.issues[0].message },

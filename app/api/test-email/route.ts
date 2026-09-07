@@ -20,7 +20,6 @@ export async function GET() {
             message: 'Test email sent successfully'
         });
     } catch (error: any) {
-        console.error('Failed to send test email:', error);
         return NextResponse.json({
             success: false,
             error: error.message

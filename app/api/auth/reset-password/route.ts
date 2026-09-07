@@ -46,13 +46,11 @@ export async function POST(request: Request) {
     });
 
     // In a real application, send email here
-    console.log(`Reset link: ${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`);
 
     return NextResponse.json({ 
       message: 'If an account exists with this email, you will receive password reset instructions.' 
     });
   } catch (error) {
-    console.error('Password reset request error:', error);
     return NextResponse.json(
       { error: 'An error occurred while processing your request.' },
       { status: 500 }
@@ -93,7 +91,6 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ message: 'Password reset successful.' });
   } catch (error) {
-    console.error('Password reset error:', error);
     return NextResponse.json(
       { error: 'An error occurred while resetting your password.' },
       { status: 500 }
