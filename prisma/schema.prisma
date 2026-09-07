@@ -27,6 +27,12 @@ model User {
   sickDays            Int            @default(10)  // Sick leave balance in days
   sessions             Session[]      // For session management
   leaveRequests        LeaveRequest[]
+  
+  // Account security
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  lastFailedLogin     DateTime?
+  lastSuccessfulLogin DateTime?
 
   @@map("users")
 }

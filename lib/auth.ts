@@ -38,6 +38,7 @@ export const authOptions = {
 
           const { email, password } = loginSchema.parse(credentials);
 
+          // Check if account is locked
           const user = await prisma.user.findUnique({
             where: { email },
             select: {
@@ -47,7 +48,9 @@ export const authOptions = {
               firstName: true,
               lastName: true,
               role: true,
-              passwordResetRequired: true
+              passwordResetRequired: true,
+              lockedUntil: true,
+              failedLoginAttempts: true,
             }
           });
 
@@ -55,11 +58,31 @@ export const authOptions = {
             return null;
           }
 
+          // Check if account is locked
+          if (user.lockedUntil && new Date() < user.lockedUntil) {
+            const lockoutTimeMinutes = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
+            return null; // Account is locked
+          }
+
           const isValid = await bcrypt.compare(password, user.password);
           
           if (!isValid) {
+            // Record failed attempt (this will also lock the account if max attempts reached)
+            const { recordFailedLoginAttempt } = await import('./account-lockout');
+            const isNowLocked = await recordFailedLoginAttempt(email);
+            
+            if (isNowLocked) {
+              // Log security event
+              const { logger } = await import('./logger');
+              logger.securityEvent('account_locked', { email, userId: user.id });
+            }
+            
             return null;
           }
+
+          // Record successful login
+          const { recordSuccessfulLogin } = await import('./account-lockout');
+          await recordSuccessfulLogin(user.id);
 
           const authUser = {
             id: user.id,

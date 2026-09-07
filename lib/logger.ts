@@ -6,6 +6,10 @@ interface LogEntry {
   timestamp: string;
   data?: any;
   context?: Record<string, any>;
+  userId?: string;
+  requestId?: string;
+  statusCode?: number;
+  duration?: number;
 }
 
 interface LoggerConfig {
@@ -51,6 +55,28 @@ class Logger {
     };
   }
 
+  private sanitizeData(data: any): any {
+    if (!data) return data;
+    
+    const sensitiveKeys = ['password', 'token', 'secret', 'apiKey', 'credentials', 'email', 'phone', 'ssn'];
+    
+    if (typeof data === 'object' && data !== null) {
+      const sanitized = Array.isArray(data) ? [...data] : { ...data };
+      
+      for (const key in sanitized) {
+        if (sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))) {
+          sanitized[key] = '[REDACTED]';
+        } else if (typeof sanitized[key] === 'object') {
+          sanitized[key] = this.sanitizeData(sanitized[key]);
+        }
+      }
+      
+      return sanitized;
+    }
+    
+    return data;
+  }
+
   private getRequestContext(): Record<string, any> {
     if (typeof window !== 'undefined') {
       return {
@@ -69,37 +95,29 @@ class Logger {
     if (!this.shouldLog(level)) return;
 
     const enrichedContext = this.enrichContext(context);
+    const sanitizedData = this.sanitizeData(data);
+    
     const entry: LogEntry = {
       level,
       message,
       timestamp: new Date().toISOString(),
-      data,
+      data: sanitizedData,
       context: enrichedContext
     };
 
-    // Console logging if enabled
+    // Console logging if enabled (structured JSON format)
     if (this.config.consoleEnabled) {
-      const formattedMessage = this.formatMessage(entry);
-      switch (level) {
-        case 'debug':
-          console.debug(formattedMessage);
-          break;
-        case 'info':
-          console.info(formattedMessage);
-          break;
-        case 'warn':
-          console.warn(formattedMessage);
-          break;
-        case 'error':
-          console.error(formattedMessage);
-          break;
-      }
+      console.log(JSON.stringify({
+        timestamp: entry.timestamp,
+        level: entry.level,
+        message: entry.message,
+        data: sanitizedData,
+        context: enrichedContext
+      }));
     }
 
     // Send errors to error reporting service in production
     if (level === 'error' && process.env.NODE_ENV === 'production') {
-      // Here you would integrate with your error reporting service (e.g., Sentry)
-      // For now, we'll just ensure errors are properly formatted
       const errorData = data instanceof Error ? {
         name: data.name,
         message: data.message,
@@ -111,7 +129,7 @@ class Logger {
         errorData
       };
 
-      // Log to console in a format suitable for log aggregation
+      // Log to console in structured format for aggregation
       console.error(JSON.stringify({
         timestamp: new Date().toISOString(),
         level: 'error',
@@ -146,6 +164,42 @@ class Logger {
     } : error;
 
     this.log('error', message, errorDetails, context);
+  }
+
+  /**
+   * Log API request/response
+   */
+  public apiRequest(
+    method: string,
+    path: string,
+    statusCode: number,
+    duration: number,
+    userId?: string
+  ) {
+    this.log('info', `${method} ${path}`, {
+      statusCode,
+      durationMs: duration,
+      userId,
+      method,
+      path,
+    });
+  }
+
+  /**
+   * Log authentication event
+   */
+  public authEvent(event: 'login_attempt' | 'login_success' | 'login_failed' | 'logout' | 'account_locked', userId?: string, context?: Record<string, any>) {
+    this.log('info', `Auth: ${event}`, { event, userId }, context);
+  }
+
+  /**
+   * Log security event
+   */
+  public securityEvent(
+    event: 'rate_limit_exceeded' | 'invalid_token' | 'unauthorized_access' | 'account_locked',
+    context?: Record<string, any>
+  ) {
+    this.log('warn', `Security: ${event}`, { event }, context);
   }
 
   public static getInstance(): Logger {
