@@ -48,75 +48,70 @@ class Logger {
   private enrichContext(context?: Record<string, any>): Record<string, any> {
     return {
       timestamp: new Date().toISOString(),
-      environment: process.env.NODE_ENV,
-      version: process.env.APP_VERSION,
-      ...this.getRequestContext(),
-      ...context
+      ...context,
     };
   }
 
   private sanitizeData(data: any): any {
-    if (!data) return data;
-    
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+
     const sensitiveKeys = ['password', 'token', 'secret', 'apiKey', 'credentials', 'email', 'phone', 'ssn'];
-    
-    if (typeof data === 'object' && data !== null) {
-      const sanitized = Array.isArray(data) ? [...data] : { ...data };
-      
-      for (const key in sanitized) {
-        if (sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))) {
-          sanitized[key] = '[REDACTED]';
-        } else if (typeof sanitized[key] === 'object') {
-          sanitized[key] = this.sanitizeData(sanitized[key]);
-        }
+    const sanitized = Array.isArray(data) ? [...data] : { ...data };
+
+    for (const key in sanitized) {
+      if (sensitiveKeys.some(sensitive => key.toLowerCase().includes(sensitive.toLowerCase()))) {
+        sanitized[key] = '***REDACTED***';
+      } else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
+        sanitized[key] = this.sanitizeData(sanitized[key]);
       }
-      
-      return sanitized;
     }
-    
-    return data;
+
+    return sanitized;
   }
 
-  private getRequestContext(): Record<string, any> {
-    if (typeof window !== 'undefined') {
-      return {
-        url: window.location.href,
-        userAgent: window.navigator.userAgent,
-        viewport: {
-          width: window.innerWidth,
-          height: window.innerHeight
-        }
-      };
+  private log(
+    level: LogLevel,
+    message: string,
+    data?: any,
+    context?: Record<string, any>
+  ) {
+    if (!this.shouldLog(level)) {
+      return;
     }
-    return {};
-  }
 
-  private log(level: LogLevel, message: string, data?: any, context?: Record<string, any>) {
-    if (!this.shouldLog(level)) return;
-
-    const enrichedContext = this.enrichContext(context);
     const sanitizedData = this.sanitizeData(data);
-    
+    const sanitizedContext = this.sanitizeData(context);
+    const enrichedContext = this.enrichContext(sanitizedContext);
+
     const entry: LogEntry = {
       level,
       message,
       timestamp: new Date().toISOString(),
       data: sanitizedData,
-      context: enrichedContext
+      context: enrichedContext,
     };
 
-    // Console logging if enabled (structured JSON format)
     if (this.config.consoleEnabled) {
-      console.log(JSON.stringify({
+      const output = JSON.stringify({
         timestamp: entry.timestamp,
         level: entry.level,
         message: entry.message,
-        data: sanitizedData,
-        context: enrichedContext
-      }));
+        ...(sanitizedData && { data: sanitizedData }),
+        ...(enrichedContext && { context: enrichedContext }),
+      });
+
+      if (level === 'error') {
+        console.error(output);
+      } else if (level === 'warn') {
+        console.warn(output);
+      } else {
+        console.log(output);
+      }
     }
 
-    // Send errors to error reporting service in production
+    // Send error to Sentry in production
     if (level === 'error' && process.env.NODE_ENV === 'production') {
       const errorData = data instanceof Error ? {
         name: data.name,
@@ -170,25 +165,27 @@ class Logger {
    * Log API request/response
    */
   public apiRequest(
-    method: string,
-    path: string,
+    request: Request,
     statusCode: number,
-    duration: number,
-    userId?: string
+    context?: Record<string, any>
   ) {
-    this.log('info', `${method} ${path}`, {
+    const url = new URL(request.url);
+    this.log('info', `${request.method} ${url.pathname}`, {
       statusCode,
-      durationMs: duration,
-      userId,
-      method,
-      path,
+      method: request.method,
+      path: url.pathname,
+      ...context,
     });
   }
 
   /**
    * Log authentication event
    */
-  public authEvent(event: 'login_attempt' | 'login_success' | 'login_failed' | 'logout' | 'account_locked', userId?: string, context?: Record<string, any>) {
+  public authEvent(
+    event: 'login_attempt' | 'login_success' | 'login_failed' | 'logout' | 'account_locked',
+    userId?: string,
+    context?: Record<string, any>
+  ) {
     this.log('info', `Auth: ${event}`, { event, userId }, context);
   }
 
@@ -196,7 +193,7 @@ class Logger {
    * Log security event
    */
   public securityEvent(
-    event: 'rate_limit_exceeded' | 'invalid_token' | 'unauthorized_access' | 'account_locked',
+    event: 'rate_limit_exceeded' | 'invalid_token' | 'unauthorized_access' | 'account_locked' | 'profile_access_unauthorized' | 'profile_update_unauthorized' | 'profile_not_found' | 'test_email_sent' | 'test_email_error' | 'team_access_unauthorized' | 'user_not_found' | 'team_access_denied' | 'password_reset_requested' | 'password_reset_error' | 'password_reset_completed' | 'password_reset_completion_error',
     context?: Record<string, any>
   ) {
     this.log('warn', `Security: ${event}`, { event }, context);

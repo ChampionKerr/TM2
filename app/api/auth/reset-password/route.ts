@@ -3,6 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { z } from 'zod';
 import { randomBytes } from 'crypto';
 import bcrypt from 'bcryptjs';
+import { passwordResetRateLimit, checkRateLimit, getClientIP } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
 
 const emailSchema = z.object({
   email: z.string().email(),
@@ -18,6 +20,23 @@ const TOKEN_EXPIRATION = 2;
 
 export async function POST(request: Request) {
   try {
+    const clientIP = getClientIP(request);
+    const rateLimitKey = `password-reset:${clientIP}`;
+    
+    // Check rate limit
+    const rateLimitResult = await checkRateLimit(passwordResetRateLimit, rateLimitKey);
+    if (!rateLimitResult.success) {
+      logger.securityEvent('rate_limit_exceeded', { 
+        endpoint: 'password-reset', 
+        ip: clientIP,
+        remaining: rateLimitResult.remaining 
+      });
+      return NextResponse.json(
+        { error: 'Too many password reset requests. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { email } = emailSchema.parse(body);
 
@@ -26,31 +45,37 @@ export async function POST(request: Request) {
       where: { email },
     });
 
-    if (!user) {
-      return NextResponse.json({ 
-        message: 'If an account exists with this email, you will receive password reset instructions.' 
+    if (user) {
+      // Generate reset token
+      const token = randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + TOKEN_EXPIRATION * 60 * 60 * 1000); // 2 hours from now
+
+      // Store reset token
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          resetToken: token,
+          resetTokenExpires: expiresAt,
+        },
       });
+
+      logger.securityEvent('password_reset_requested', {
+        userId: user.id,
+        email: email,
+        ip: clientIP,
+      });
+
+      // In a real application, send email here
     }
-
-    // Generate reset token
-    const token = randomBytes(32).toString('hex');
-    const expiresAt = new Date(Date.now() + TOKEN_EXPIRATION * 60 * 60 * 1000); // 2 hours from now
-
-    // Store reset token
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        resetToken: token, // Use the correct field name from your Prisma schema
-        resetTokenExpires: expiresAt,
-      },
-    });
-
-    // In a real application, send email here
 
     return NextResponse.json({ 
       message: 'If an account exists with this email, you will receive password reset instructions.' 
     });
   } catch (error) {
+    logger.securityEvent('password_reset_error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      ip: getClientIP(request),
+    });
     return NextResponse.json(
       { error: 'An error occurred while processing your request.' },
       { status: 500 }
@@ -66,7 +91,7 @@ export async function PUT(request: Request) {
     // Find user by reset token
     const user = await prisma.user.findFirst({
       where: {
-        resetToken: token, // Use the correct field name from your Prisma schema
+        resetToken: token,
       },
     });
 
@@ -84,13 +109,23 @@ export async function PUT(request: Request) {
     await prisma.user.update({
       where: { id: user.id },
       data: {
-        password: hashedPassword, // Use the correct field name from your Prisma schema
-        resetToken: null, // Use the correct field name from your Prisma schema
+        password: hashedPassword,
+        resetToken: null,
       },
+    });
+
+    logger.securityEvent('password_reset_completed', {
+      userId: user.id,
+      email: user.email,
+      ip: getClientIP(request),
     });
 
     return NextResponse.json({ message: 'Password reset successful.' });
   } catch (error) {
+    logger.securityEvent('password_reset_completion_error', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      ip: getClientIP(request),
+    });
     return NextResponse.json(
       { error: 'An error occurred while resetting your password.' },
       { status: 500 }

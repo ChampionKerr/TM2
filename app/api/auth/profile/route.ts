@@ -1,6 +1,7 @@
 import { getToken } from 'next-auth/jwt';
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { logger } from '@/lib/logger';
 
 export async function GET(request: NextRequest) {
   try {
@@ -10,6 +11,10 @@ export async function GET(request: NextRequest) {
     });
 
     if (!token || !token.sub) {
+      logger.securityEvent('profile_access_unauthorized', {
+        endpoint: '/api/auth/profile',
+        method: 'GET'
+      });
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -33,14 +38,24 @@ export async function GET(request: NextRequest) {
     });
 
     if (!user) {
+      logger.securityEvent('profile_not_found', {
+        userId: token.sub,
+        endpoint: '/api/auth/profile',
+      });
       return NextResponse.json(
         { error: 'User not found' },
         { status: 404 }
       );
     }
 
+    logger.apiRequest(request, 200, { endpoint: '/api/auth/profile', method: 'GET', userId: token.sub });
     return NextResponse.json({ user });
   } catch (error) {
+    logger.apiRequest(request, 500, { 
+      endpoint: '/api/auth/profile',
+      method: 'GET',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return NextResponse.json(
       { error: 'Failed to fetch profile' },
       { status: 500 }
@@ -56,6 +71,10 @@ export async function PUT(request: NextRequest) {
     });
 
     if (!token || !token.sub) {
+      logger.securityEvent('profile_update_unauthorized', {
+        endpoint: '/api/auth/profile',
+        method: 'PUT'
+      });
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -67,6 +86,12 @@ export async function PUT(request: NextRequest) {
 
     // Validate input
     if (!firstName || !lastName) {
+      logger.apiRequest(request, 400, {
+        endpoint: '/api/auth/profile',
+        method: 'PUT',
+        userId: token.sub,
+        reason: 'Missing required fields'
+      });
       return NextResponse.json(
         { error: 'First name and last name are required' },
         { status: 400 }
@@ -95,8 +120,20 @@ export async function PUT(request: NextRequest) {
       }
     });
 
+    logger.apiRequest(request, 200, {
+      endpoint: '/api/auth/profile',
+      method: 'PUT',
+      userId: token.sub,
+      action: 'profile_updated'
+    });
+
     return NextResponse.json({ user });
   } catch (error) {
+    logger.apiRequest(request, 500, {
+      endpoint: '/api/auth/profile',
+      method: 'PUT',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return NextResponse.json(
       { error: 'Failed to update profile' },
       { status: 500 }

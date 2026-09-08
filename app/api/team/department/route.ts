@@ -3,11 +3,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user) {
+      logger.securityEvent('team_access_unauthorized', {
+        endpoint: '/api/team/department',
+        method: 'GET'
+      });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -15,6 +20,12 @@ export async function GET(request: NextRequest) {
     const department = searchParams.get('dept')
 
     if (!department) {
+      logger.apiRequest(request, 400, {
+        endpoint: '/api/team/department',
+        method: 'GET',
+        userId: session.user.id,
+        reason: 'Missing department parameter'
+      });
       return NextResponse.json({ error: 'Department parameter is required' }, { status: 400 })
     }
 
@@ -25,11 +36,21 @@ export async function GET(request: NextRequest) {
     })
 
     if (!currentUser) {
+      logger.securityEvent('user_not_found', {
+        userId: session.user.id,
+        endpoint: '/api/team/department'
+      });
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     // Only allow users to view their own department (unless admin)
     if (session.user.role !== 'admin' && currentUser.department !== department) {
+      logger.securityEvent('team_access_denied', {
+        userId: session.user.id,
+        requestedDepartment: department,
+        userDepartment: currentUser.department,
+        endpoint: '/api/team/department'
+      });
       return NextResponse.json({ error: 'Access denied: Can only view your own department' }, { status: 403 })
     }
 
@@ -38,7 +59,7 @@ export async function GET(request: NextRequest) {
       where: {
         department: department,
         id: {
-          not: session.user.id // Exclude current user
+          not: session.user.id
         }
       },
       select: {
@@ -50,8 +71,6 @@ export async function GET(request: NextRequest) {
         role: true,
         vacationDays: true,
         sickDays: true,
-        // Note: We don't have usedVacation/usedSick in the schema yet
-        // These would need to be calculated from leave requests
       }
     })
 
@@ -94,6 +113,14 @@ export async function GET(request: NextRequest) {
       })
     )
 
+    logger.apiRequest(request, 200, {
+      endpoint: '/api/team/department',
+      method: 'GET',
+      userId: session.user.id,
+      department: department,
+      membersReturned: membersWithUsage.length
+    });
+
     return NextResponse.json({
       success: true,
       members: membersWithUsage,
@@ -101,6 +128,11 @@ export async function GET(request: NextRequest) {
     })
 
   } catch (error) {
+    logger.apiRequest(request, 500, {
+      endpoint: '/api/team/department',
+      method: 'GET',
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     return NextResponse.json(
       { error: 'Failed to fetch team members' },
       { status: 500 }
